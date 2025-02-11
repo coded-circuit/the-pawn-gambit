@@ -23,31 +23,77 @@ export const PageName = {
   CREDITS: 3,
 };
 
+export const PieceMovementFunc = {
+  [PieceType.PLAYER]: (x, y, occupiedCells) => {
+    assert(false, "Player does not have a movement function");
+  },
+  [PieceType.QUEEN]: (x, y, occupiedCells) => {
+    return [].concat(
+      getMoveCellsByDirection(x, y, 1, 0, occupiedCells),
+      getMoveCellsByDirection(x, y, 1, 1, occupiedCells),
+      getMoveCellsByDirection(x, y, 0, 1, occupiedCells),
+      getMoveCellsByDirection(x, y, -1, 1, occupiedCells),
+      getMoveCellsByDirection(x, y, -1, 0, occupiedCells),
+      getMoveCellsByDirection(x, y, -1, -1, occupiedCells),
+      getMoveCellsByDirection(x, y, 0, -1, occupiedCells),
+      getMoveCellsByDirection(x, y, 1, -1, occupiedCells)
+    );
+  },
+  [PieceType.ROOK]: (x, y, occupiedCells) => {
+    return [].concat(
+      getMoveCellsByDirection(x, y, 1, 0, occupiedCells),
+      getMoveCellsByDirection(x, y, 0, 1, occupiedCells),
+      getMoveCellsByDirection(x, y, -1, 0, occupiedCells),
+      getMoveCellsByDirection(x, y, 0, -1, occupiedCells)
+    );
+  },
+  [PieceType.BISHOP]: (x, y, occupiedCells) => {
+    return [].concat(
+      getMoveCellsByDirection(x, y, 1, 1, occupiedCells),
+      getMoveCellsByDirection(x, y, -1, 1, occupiedCells),
+      getMoveCellsByDirection(x, y, -1, -1, occupiedCells),
+      getMoveCellsByDirection(x, y, 1, -1, occupiedCells)
+    );
+  },
+  [PieceType.KNIGHT]: (x, y, occupiedCells) => {
+    return [].concat(
+      getMoveCellsByOffset(
+        x,
+        y,
+        [
+          { x: 1, y: 2 },
+          { x: 2, y: 1 },
+          { x: 2, y: -1 },
+          { x: 1, y: -2 },
+          { x: -1, y: -2 },
+          { x: -2, y: -1 },
+          { x: -2, y: 1 },
+          { x: -1, y: 2 },
+        ],
+        occupiedCells
+      )
+    );
+  },
+  [PieceType.PAWN]: (x, y, occupiedCells) => {}, // TODO: Pawns
+};
+
 export const TRANSITION_HALF_LIFE = 750;
 
 Object.freeze(PieceType);
 Object.freeze(PieceCooldown);
 Object.freeze(PageName);
 
-export class Vector2 {
-  x = 0;
-  y = 0;
+// ------------------------------------ MATH UTILITIES ------------------------------------
+export function getDistance(v1, v2) {
+  assertIsVector(v1);
+  assertIsVector(v2);
+  return Math.sqrt((v1.x - v2.x) ** 2 + (v1.y - v2.y) ** 2);
+}
 
-  constructor(x = 0, y = 0) {
-    assert(!isNaN(x) && !isNaN(y), "Invalid vector2 initialization!");
-    this.x = x;
-    this.y = y;
-  }
-
-  distance(to) {
-    assert(to instanceof Vector2, "Invalid distance input!");
-    return Math.sqrt(Math.pow(this.x - to.x, 2) + Math.pow(this.y - to.y, 2));
-  }
-
-  add(to) {
-    assert(to instanceof Vector2, "Invalid add input!");
-    return new Vector2(this.x + to.x, this.y + to.y);
-  }
+export function getVectorSum(v1, v2) {
+  assertIsVector(v1);
+  assertIsVector(v2);
+  return { x: v1.x + v2.x, y: v1.y + v2.y };
 }
 
 export function isEven(number) {
@@ -58,14 +104,59 @@ export function isEven(number) {
   return number % 2 === 0;
 }
 
-// FOR DEBUGGING:
+// ------------------------------------ GRID UTILITIES ------------------------------------
 
+export function isValidCell(vector) {
+  assertIsVector(vector);
+  return vector.x >= 0 && vector.x < 8 && vector.y >= 0 && vector.y < 8;
+}
+
+// ------------------------------------ DEBUGGING UTILITIES ------------------------------------
 export function assert(condition, message) {
   if (!condition) {
     throw new Error(message);
   }
 }
 
+export function assertIsVector(vector) {
+  assert(
+    vector.hasOwnProperty("x") && vector.hasOwnProperty("y"),
+    `Vector assertion failed: ${vector}`
+  );
+}
+
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// ------------------------------------ MOVEMENT UTILITIES ------------------------------------
+function getMoveCellsByOffset(origX, origY, offsets, obstacles = []) {
+  const output = [];
+  offsets.forEach((offset) => {
+    assertIsVector(offset);
+    const move = { x: origX + offset.x, y: origY + offset.y };
+    if (!arrayHasVector(obstacles, move) && isValidCell(move)) {
+      output.push(move);
+    }
+  });
+  return output;
+}
+
+function getMoveCellsByDirection(origX, origY, dirX, dirY, obstacles = []) {
+  const output = [];
+  const currCell = { x: origX + dirX, y: origY + dirY };
+  while (isValidCell(currCell) && !arrayHasVector(obstacles, currCell)) {
+    output.push({ ...currCell });
+    currCell.x += dirX;
+    currCell.y += dirY;
+  }
+  return output;
+}
+
+function arrayHasVector(array, vector) {
+  assertIsVector(vector);
+  return (
+    array.find((item) => item.x === vector.x && item.y === vector.y) !==
+    undefined
+  );
 }
