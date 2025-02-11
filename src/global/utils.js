@@ -82,6 +82,7 @@ export const TRANSITION_HALF_LIFE = 750;
 Object.freeze(PieceType);
 Object.freeze(PieceCooldown);
 Object.freeze(PageName);
+Object.freeze(PieceMovementFunc);
 
 // ------------------------------------ MATH UTILITIES ------------------------------------
 export function getDistance(v1, v2) {

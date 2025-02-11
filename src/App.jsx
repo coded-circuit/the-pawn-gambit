@@ -11,6 +11,7 @@ function App() {
   const [pageElement, setPageElement] = useState();
   const [transitionElement, setTransitionElement] = useState();
 
+  // Handle Page Transition
   useEffect(() => {
     (async () => {
       switch (currentPage) {

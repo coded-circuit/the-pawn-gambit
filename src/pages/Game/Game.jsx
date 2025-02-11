@@ -1,8 +1,9 @@
 import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import useInputs from "../../hooks/useInputs";
 import GameUI from "./GameUI";
 import styles from "./Game.module.scss";
 import GridCell from "./GridCell";
-import { useDispatch } from "react-redux";
 import { resetState } from "../../data/gameSlice";
 
 // Initialize the grid cells
@@ -16,6 +17,14 @@ for (let y = 0; y < 8; y++) {
 
 const Game = () => {
   const dispatch = useDispatch();
+  const input = useInputs();
+
+  // Handle Input
+  useEffect(() => {
+    // TODO: stop input for a few seconds when starting game
+
+    console.log(input);
+  }, [input]);
 
   //Initialize game
   useEffect(() => {
