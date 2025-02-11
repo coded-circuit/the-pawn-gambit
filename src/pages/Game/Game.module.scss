@@ -1,0 +1,45 @@
+$grid-scale: 65;
+$grid-border-radius: 4vmin;
+$grid-border-thickness: 3vmin;
+
+.graphicsGridBorder,
+.graphicsGridTrunk {
+  width: calc($grid-scale * 1vmin + $grid-border-thickness * 2);
+  height: calc($grid-scale * 1vmin + $grid-border-thickness * 2);
+  position: absolute;
+  top: calc(45vh - $grid-scale * 1vmin / 2 - $grid-border-thickness);
+  left: calc(50vw - $grid-scale * 1vmin / 2 - $grid-border-thickness);
+}
+
+.gridContainer {
+  width: calc($grid-scale * 1vmin);
+  height: calc($grid-scale * 1vmin);
+  position: absolute;
+  top: calc(45vh - $grid-scale * 1vmin / 2);
+  left: calc(50vw - $grid-scale * 1vmin / 2);
+
+  background-color: rgba(0, 0, 0, 0.236);
+  z-index: theme.$z-ind-grid;
+}
+
+.graphicsGridBorder {
+  z-index: theme.$z-ind-grid-border;
+  background-color: theme.$acc-clr-1;
+  border-radius: $grid-border-radius;
+}
+
+.graphicsGridTrunk {
+  height: 100vh;
+  z-index: theme.$z-ind-grid-trunk;
+  background-color: theme.$acc-clr-2;
+  $shadow-clr: rgba(0, 0, 0, 0.147);
+  background-image: linear-gradient(
+    90deg,
+    $shadow-clr,
+    transparent $grid-border-radius / 2,
+    transparent calc(100% - $grid-border-radius / 2),
+    $shadow-clr
+  );
+
+  border-radius: $grid-border-radius;
+}

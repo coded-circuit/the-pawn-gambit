@@ -14,9 +14,18 @@ $stripe-scale: 6rem;
 $stripe-color: #f1ddc6;
 $checker-scale: 6rem;
 
+
+$z-ind-transition: 99;
+$z-ind-game-ui: 90;
+$z-ind-grid: 3;
+$z-ind-grid-border: 2;
+$z-ind-grid-trunk: 1;
+
+
+
 @font-face {
   font-family: "ConcertOne";
-  src: url("/public/fonts/ConcertOne-Regular.ttf") format("truetype");
+  src: url("/fonts/ConcertOne-Regular.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
