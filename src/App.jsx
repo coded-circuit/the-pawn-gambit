@@ -1,28 +1,57 @@
-import { useDispatch, useSelector } from "react-redux";
-import { MainMenu, Game } from "./pages/index";
+import { useSelector } from "react-redux";
+import { MainMenu, Game, Options, Credits } from "./pages/index";
+import { Transition } from "./components";
 import "./App.module.scss";
 import { selectPage } from "./data/menuSlice";
-import { PageName } from "./global/utils";
+import { PageName, TRANSITION_HALF_LIFE, sleep } from "./global/utils";
 import { useEffect, useState } from "react";
 
 function App() {
   const currentPage = useSelector(selectPage);
-  const dispatch = useDispatch();
   const [pageElement, setPageElement] = useState();
-  console.log(currentPage);
+  const [transitionElement, setTransitionElement] = useState();
 
   useEffect(() => {
-    switch (currentPage) {
-      case PageName.MAIN_MENU:
-        setPageElement(<MainMenu />);
-        break;
-      case PageName.GAME:
-        setPageElement(<Game />);
-        break;
-    }
+    (async () => {
+      switch (currentPage) {
+        case PageName.MAIN_MENU:
+          setTransitionElement(<Transition />);
+          await sleep(TRANSITION_HALF_LIFE);
+          setPageElement(<MainMenu />);
+          await sleep(TRANSITION_HALF_LIFE);
+          setTransitionElement();
+          break;
+        case PageName.GAME:
+          setTransitionElement(<Transition />);
+          await sleep(TRANSITION_HALF_LIFE);
+          setPageElement(<Game />);
+          await sleep(TRANSITION_HALF_LIFE);
+          setTransitionElement();
+          break;
+        case PageName.OPTIONS:
+          setTransitionElement(<Transition />);
+          await sleep(TRANSITION_HALF_LIFE);
+          setPageElement(<Options />);
+          await sleep(TRANSITION_HALF_LIFE);
+          setTransitionElement();
+          break;
+        case PageName.CREDITS:
+          setTransitionElement(<Transition />);
+          await sleep(TRANSITION_HALF_LIFE);
+          setPageElement(<Credits />);
+          await sleep(TRANSITION_HALF_LIFE);
+          setTransitionElement();
+          break;
+      }
+    })();
   }, [currentPage]);
 
-  return pageElement;
+  return (
+    <>
+      {transitionElement}
+      {pageElement}
+    </>
+  );
 }
 
 // function App() {

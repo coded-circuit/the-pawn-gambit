@@ -1,22 +1,57 @@
 import { useDispatch } from "react-redux";
 import { switchPage } from "../../data/menuSlice";
-import { PageName } from "../../global/utils";
+import { PageName, TRANSITION_HALF_LIFE, sleep } from "../../global/utils";
 import styles from "./MainMenu.module.scss";
+import { useEffect, useState } from "react";
 
 const MainMenu = () => {
+  const [disabled, setDisabled] = useState(true);
+  const [hasClicked, setHasClicked] = useState(false);
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    (async () => {
+      await sleep(TRANSITION_HALF_LIFE);
+      setDisabled(false);
+    })();
+  }, []);
+
   return (
-    <main>
+    <main className={styles.mainMenu}>
       <div>
         <h1>
           <span className={styles.subtitle}>PAWN's</span> GAMBIT
         </h1>
-        <button onClick={() => dispatch(switchPage(PageName.GAME))}>
+        <button
+          onClick={() => {
+            if (hasClicked) return;
+            dispatch(switchPage(PageName.GAME));
+            setHasClicked(true);
+          }}
+          disabled={disabled}
+        >
           PLAY
         </button>
-        <button>OPTIONS</button>
-        <button>CREDITS</button>
+        <button
+          onClick={() => {
+            if (hasClicked) return;
+            dispatch(switchPage(PageName.OPTIONS));
+            setHasClicked(true);
+          }}
+          disabled={disabled}
+        >
+          OPTIONS
+        </button>
+        <button
+          onClick={() => {
+            if (hasClicked) return;
+            dispatch(switchPage(PageName.CREDITS));
+            setHasClicked(true);
+          }}
+          disabled={disabled}
+        >
+          CREDITS
+        </button>
       </div>
     </main>
   );

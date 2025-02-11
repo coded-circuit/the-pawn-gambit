@@ -23,6 +23,8 @@ export const PageName = {
   CREDITS: 3,
 };
 
+export const TRANSITION_HALF_LIFE = 750;
+
 Object.freeze(PieceType);
 Object.freeze(PieceCooldown);
 Object.freeze(PageName);
@@ -37,8 +39,14 @@ export class Vector2 {
   }
 }
 
+// FOR DEBUGGING:
+
 export function assert(condition, message) {
   if (!condition) {
     throw new Error(message);
   }
+}
+
+export function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
