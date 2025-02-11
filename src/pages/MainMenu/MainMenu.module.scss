@@ -1,0 +1,35 @@
+h1 {
+  font-size: 5rem;
+  // margin-top: -20vh;
+  margin-bottom: 2rem;
+  text-shadow: 0 0.5rem 0.6rem black;
+
+  @include theme.breathing;
+}
+
+.subtitle {
+  margin-bottom: -0.8rem;
+  font-size: 2rem;
+  display: block;
+  text-align: center;
+}
+
+main {
+  width: 100vw;
+  height: 100vh;
+  max-width: 500px;
+  color: theme.$light-clr-1;
+  margin-inline: auto;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    @include theme.checkered;
+
+    height: 100%;
+    clip-path: polygon(0 0, 100% 0, 70% 100%, 30% 100%);
+  }
+}
