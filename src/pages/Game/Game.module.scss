@@ -1,5 +1,6 @@
 $grid-scale: 65;
-$grid-border-radius: 4vmin;
+$grid-border-outer-radius: 4vmin;
+$grid-border-inner-radius: 2vmin;
 $grid-border-thickness: 3vmin;
 
 .graphicsGridBorder,
@@ -18,14 +19,21 @@ $grid-border-thickness: 3vmin;
   top: calc(45vh - $grid-scale * 1vmin / 2);
   left: calc(50vw - $grid-scale * 1vmin / 2);
 
-  background-color: rgba(0, 0, 0, 0.236);
+  border-radius: $grid-border-inner-radius;
   z-index: theme.$z-ind-grid;
+  overflow: hidden;
+
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
 }
 
 .graphicsGridBorder {
   z-index: theme.$z-ind-grid-border;
   background-color: theme.$acc-clr-1;
-  border-radius: $grid-border-radius;
+  // background-color: transparent;
+  // border: 3rem solid theme.$acc-clr-1;
+  border-radius: $grid-border-outer-radius;
 }
 
 .graphicsGridTrunk {
@@ -36,10 +44,10 @@ $grid-border-thickness: 3vmin;
   background-image: linear-gradient(
     90deg,
     $shadow-clr,
-    transparent $grid-border-radius / 2,
-    transparent calc(100% - $grid-border-radius / 2),
+    transparent $grid-border-outer-radius / 2,
+    transparent calc(100% - $grid-border-outer-radius / 2),
     $shadow-clr
   );
 
-  border-radius: $grid-border-radius;
+  border-radius: $grid-border-outer-radius;
 }

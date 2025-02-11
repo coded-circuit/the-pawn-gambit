@@ -30,13 +30,21 @@ Object.freeze(PieceCooldown);
 Object.freeze(PageName);
 
 export class Vector2 {
-  #x = 0;
-  #y = 0;
+  x = 0;
+  y = 0;
 
   constructor(x, y) {
-    this.#x = x;
-    this.#y = y;
+    this.x = x;
+    this.y = y;
   }
+}
+
+export function isEven(number) {
+  assert(
+    !isNaN(number),
+    "Trying to check the evenness of a number but isn't a number!"
+  );
+  return number % 2 === 0;
 }
 
 // FOR DEBUGGING:
