@@ -3,19 +3,24 @@ import GameUI from "./GameUI";
 import styles from "./Game.module.scss";
 import GridCell from "./GridCell";
 import { Vector2 } from "../../global/utils";
+import { useDispatch } from "react-redux";
+import { resetState } from "../../data/gameSlice";
 
-const gridCells = Array(64).fill(null);
-
-const gridCellPositions = Array(64).fill(new Vector2());
+// Initialize the grid cells
+const gridCells = new Array(8).fill(null).map(() => new Array(8).fill(null));
 for (let y = 0; y < 8; y++) {
   for (let x = 0; x < 8; x++) {
-    gridCellPositions[x + y * 8] = new Vector2(x, y);
+    const i = x + y * 8;
+    gridCells[y][x] = <GridCell key={i} pos={new Vector2(x, y)} />;
   }
 }
 
 const Game = () => {
+  const dispatch = useDispatch();
+
+  //Initialize game
   useEffect(() => {
-    //Initialize game
+    dispatch(resetState());
   }, []);
 
   return (
@@ -23,11 +28,7 @@ const Game = () => {
       <GameUI />
       <div className={styles.graphicsGridBorder}></div>
       <div className={styles.graphicsGridTrunk}></div>
-      <div className={styles.gridContainer}>
-        {gridCellPositions.map((pos, i) => {
-          return <GridCell key={i} pos={pos} />;
-        })}
-      </div>
+      <div className={styles.gridContainer}>{gridCells}</div>
     </main>
   );
 };

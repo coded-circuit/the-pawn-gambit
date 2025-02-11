@@ -33,9 +33,20 @@ export class Vector2 {
   x = 0;
   y = 0;
 
-  constructor(x, y) {
+  constructor(x = 0, y = 0) {
+    assert(!isNaN(x) && !isNaN(y), "Invalid vector2 initialization!");
     this.x = x;
     this.y = y;
+  }
+
+  distance(to) {
+    assert(to instanceof Vector2, "Invalid distance input!");
+    return Math.sqrt(Math.pow(this.x - to.x, 2) + Math.pow(this.y - to.y, 2));
+  }
+
+  add(to) {
+    assert(to instanceof Vector2, "Invalid add input!");
+    return new Vector2(this.x + to.x, this.y + to.y);
   }
 }
 

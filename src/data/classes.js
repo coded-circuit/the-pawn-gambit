@@ -1,7 +1,7 @@
 import { Vector2, PieceType, PieceCooldown, assert } from "../global/utils";
 import { nanoid } from "@reduxjs/toolkit";
 
-class PieceData {
+export class PieceData {
   #pieceId = "";
   #position = new Vector2();
   #type = -1;
@@ -21,7 +21,7 @@ class PieceData {
   }
 
   getPosition() {
-    return this.#position;
+    return new Vector2(this.#position.x, this.#position.y);
   }
 
   getType() {
