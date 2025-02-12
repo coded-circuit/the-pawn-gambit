@@ -29,40 +29,43 @@ const initialState = {
 
   // pieceId: []{ x, y }
   captureCells: {},
+
+  isProcessing: false,
 };
 
 const gameSlice = createSlice({
   name: "game",
   initialState,
   reducers: {
-    resetState: {
-      reducer(state) {
-        return initialState;
-      },
-    },
-    setOccupiedCell: {
+    // resetState: {
+    //   reducer(state) {
+    //     return initialState;
+    //   },
+    // },
+    // setOccupiedCell: {
+    //   reducer(state, action) {
+    //     const { x, y, value } = action.payload;
+    //     state.occupiedCells[x][y] = value;
+    //   },
+    //   prepare(x, y, value) {
+    //     return {
+    //       payload: {
+    //         x,
+    //         y,
+    //         value,
+    //       },
+    //     };
+    //   },
+    // },
+    movePlayer: {
       reducer(state, action) {
-        const { x, y, value } = action.payload;
-        state.occupiedCells[x][y] = value;
-      },
-      prepare(x, y, value) {
-        return {
-          payload: {
-            x,
-            y,
-            value,
-          },
-        };
-      },
-    },
-    movePlayerBy: {
-      reduce(state, action) {
         const { x, y } = action.payload;
         const currPosition = state.pieces[playerId].position;
         const newPosition = getVectorSum(currPosition, { x, y });
         verifyPlayerMovement(currPosition, newPosition);
-        state.pieces[0].position.x = newPosition.x;
-        state.pieces[0].position.y = newPosition.y;
+        state.pieces[playerId].position.x = newPosition.x;
+        state.pieces[playerId].position.y = newPosition.y;
+        state.isProcessing = true;
       },
       prepare(x, y) {
         return {
@@ -73,67 +76,71 @@ const gameSlice = createSlice({
         };
       },
     },
-    addPiece: {
-      reducer(state, action) {
-        const { x, y, type } = action.payload;
-        const pieceId = nanoid();
-        const newPiece = {
-          position: { x, y },
-          type: type,
-          cooldown: PieceCooldown[type],
-        };
-        state.pieces[pieceId] = newPiece;
-      },
-      prepare(x, y, type) {
-        return {
-          payload: {
-            x,
-            y,
-            type,
-          },
-        };
-      },
-    },
-    movePieceTo: {
-      reducer(state, action) {
-        // TODO: Maybe verify if movement is valid?
-        const { pieceId, x, y } = action.payload;
-        state.pieces[pieceId].position.x = x;
-        state.pieces[pieceId].position.y = y;
-      },
-      prepare(pieceId, x, y) {
-        return {
-          payload: { pieceId, x, y },
-        };
-      },
-    },
-    processPieces: {
-      reducer(state) {
-        for (let pieceId in state.pieces) {
-          const piece = state.pieces[pieceId];
-          if (piece.cooldown === 0) {
-            piece.cooldown = PieceCooldown[piece.type];
-            const newPosition = movingPieces[pieceId];
-            piece.position.x = newPosition.x;
-            piece.position.y = newPosition.y;
-            delete movingPieces[pieceId];
-          } else {
-            piece.cooldown -= 1;
-            if (piece.cooldown === 0) {
-              // determine moves
-            }
-          }
-        }
-      },
-    },
+    // addPiece: {
+    //   reducer(state, action) {
+    //     const { x, y, type } = action.payload;
+    //     const pieceId = nanoid();
+    //     const newPiece = {
+    //       position: { x, y },
+    //       type: type,
+    //       cooldown: PieceCooldown[type],
+    //     };
+    //     state.pieces[pieceId] = newPiece;
+    //   },
+    //   prepare(x, y, type) {
+    //     return {
+    //       payload: {
+    //         x,
+    //         y,
+    //         type,
+    //       },
+    //     };
+    //   },
+    // },
+    // movePieceTo: {
+    //   reducer(state, action) {
+    //     // TODO: Maybe verify if movement is valid?
+    //     const { pieceId, x, y } = action.payload;
+    //     state.pieces[pieceId].position.x = x;
+    //     state.pieces[pieceId].position.y = y;
+    //   },
+    //   prepare(pieceId, x, y) {
+    //     return {
+    //       payload: { pieceId, x, y },
+    //     };
+    //   },
+    // },
+    // processPieces: {
+    //   reducer(state) {
+    //     for (let pieceId in state.pieces) {
+    //       const piece = state.pieces[pieceId];
+    //       if (piece.cooldown === 0) {
+    //         piece.cooldown = PieceCooldown[piece.type];
+    //         const newPosition = movingPieces[pieceId];
+    //         piece.position.x = newPosition.x;
+    //         piece.position.y = newPosition.y;
+    //         delete movingPieces[pieceId];
+    //       } else {
+    //         piece.cooldown -= 1;
+    //         if (piece.cooldown === 0) {
+    //           // determine moves
+    //         }
+    //       }
+    //     }
+    //   },
+    // },
 
     // end of reducers
   },
 });
 
-export const selectPieceById = (pieceId) => (state) => state.pieces[pieceId];
-export const selectCells = (state) => state.cells;
-export const { setOccupiedCell, resetState, movePlayerBy } = gameSlice.actions;
+export const selectPieceById = (pieceId) => (state) =>
+  state.game.pieces[pieceId];
+export const selectCells = (state) => state.game.cells;
+export const selectPlayerPosition = (state) =>
+  state.game.pieces[playerId].position;
+
+export const { movePlayer } = gameSlice.actions;
 export default gameSlice.reducer;
 
 function verifyPlayerMovement(v1, v2) {
