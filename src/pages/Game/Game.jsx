@@ -8,6 +8,9 @@ import {
   movePlayer,
   selectPlayerPosition,
   resetState,
+  processPieces,
+  addPiece,
+  selectAllPieces,
 } from "../../data/gameSlice";
 import {
   getVectorSum,
@@ -16,6 +19,7 @@ import {
   sleep,
 } from "../../global/utils";
 import Piece from "./Piece";
+import { nanoid } from "@reduxjs/toolkit";
 
 // Initialize the grid cells
 const gridCells = new Array(8).fill(null).map(() => new Array(8).fill(null));
@@ -30,6 +34,8 @@ const Game = () => {
   const dispatch = useDispatch();
   const input = useInputs();
   const processing = useRef(false);
+  const pieces = useSelector(selectAllPieces);
+  const currState = useSelector((state) => state.game);
 
   // TEST
   const playerPosition = useSelector(selectPlayerPosition);
@@ -43,6 +49,8 @@ const Game = () => {
   // Initialize game
   useEffect(() => {
     dispatch(resetState());
+    dispatch(addPiece(0, 0, PieceType.KNIGHT));
+    console.log("CURRENT STATE:", currState);
   }, []);
 
   // Handle Input
@@ -73,11 +81,25 @@ const Game = () => {
       (async () => {
         processing.current = true;
         dispatch(movePlayer(direction.x, direction.y));
-        await sleep(300);
+        await sleep(100);
+        console.log("Processing pieces");
+        dispatch(processPieces());
+        await sleep(250);
         processing.current = false;
+        console.log("CURRENT STATE:", currState);
       })();
     }
   }, [input]);
+
+  let pieceElements;
+  console.log("Pieces updated!");
+  pieceElements = Object.keys(pieces).map((pieceId) => {
+    console.log("Looping over pieces, piece:", pieces[pieceId]);
+    if (pieces[pieceId].type === 0) return <></>;
+    return (
+      <Piece key={pieceId} gridPos={pieces[pieceId].position} type={pieces[pieceId].type} />
+    );
+  });
 
   return (
     <main>
@@ -88,7 +110,8 @@ const Game = () => {
       <div className={styles.piecesContainer}>
         {/* TEST */}
         <Piece gridPos={playerPosition} type={PieceType.PLAYER} />
-        <Piece gridPos={knightPosition.current} type={PieceType.KNIGHT} />
+        {pieceElements}
+        {/* <Piece gridPos={knightPosition.current} type={PieceType.KNIGHT} /> */}
       </div>
     </main>
   );

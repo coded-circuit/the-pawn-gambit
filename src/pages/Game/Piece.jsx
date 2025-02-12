@@ -52,7 +52,7 @@ const Piece = ({ gridPos, type }) => {
       pieceComponent = <Pawn />;
       break;
     default:
-      assert(false, "Invalid type in Piece.jsx!");
+      assert(false, `Invalid type in Piece.jsx! (${type})`);
   }
 
   return (

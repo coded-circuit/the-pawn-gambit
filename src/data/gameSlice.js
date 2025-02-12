@@ -6,6 +6,9 @@ import {
   getVectorSum,
   PieceCooldown,
   assertIsVector,
+  PieceCaptureFunc,
+  arrayHasVector,
+  PieceMovementFunc,
 } from "../global/utils";
 
 const playerSpawnPos = { x: 3, y: 4 };
@@ -19,16 +22,15 @@ const initialState = {
       cooldown: null,
     },
   },
-  // 2d boolean matrix
-  occupiedCells: new Array(8).fill().map(() => new Array(8).fill(false)),
 
   // pieceId: { x, y }
   movingPieces: {},
 
-  // pieceId: []{ x, y }
-  captureCells: {},
+  // []{ x, y }, Can have duplicates
+  captureCells: [],
 
-  isProcessing: false,
+  // 2d boolean matrix
+  occupiedCells: new Array(8).fill().map(() => new Array(8).fill(false)),
 };
 initialState.occupiedCells[playerSpawnPos.y][playerSpawnPos.x] = true;
 
@@ -38,8 +40,6 @@ const gameSlice = createSlice({
   reducers: {
     resetState: {
       reducer(state) {
-        console.log("STATE RESET!");
-        console.log(initialState);
         return initialState;
       },
     },
@@ -47,13 +47,12 @@ const gameSlice = createSlice({
     movePlayer: {
       reducer(state, action) {
         const { x, y } = action.payload;
-        const currPosition = { ...state.pieces[playerId].position };
+        const currPosition = state.pieces[playerId].position;
         const newPosition = getVectorSum(currPosition, { x, y });
         verifyPlayerMovement(currPosition, newPosition);
         moveOccupiedCell(state, currPosition, newPosition);
         state.pieces[playerId].position.x = newPosition.x;
         state.pieces[playerId].position.y = newPosition.y;
-        state.isProcessing = true;
       },
       prepare(x, y) {
         return { payload: { x, y } };
@@ -76,51 +75,85 @@ const gameSlice = createSlice({
           cooldown: PieceCooldown[type],
         };
         state.pieces[pieceId] = newPiece;
+        console.log("ADDED NEW PIECE!", newPiece);
       },
       prepare(x, y, type) {
+        // TODO: ID input might be replaced
         return { payload: { x, y, type } };
       },
     },
 
     processPieces: {
-      reducer(state) {
+      reducer(state, action) {
+        const currPlayerPos = state.pieces[playerId].position;
+
         // loop over all moving pieces and check for captures
+        for (let pieceId in state.movingPieces) {
+          const piece = state.pieces[pieceId];
+          const pieceCaptureCells = PieceCaptureFunc[piece.type](
+            piece.position,
+            currPlayerPos,
+            state.occupiedCells
+          );
+          if (arrayHasVector(pieceCaptureCells, currPlayerPos)) {
+            alert("GAME OVER"); // GAME OVER
+            return state;
+          }
+        }
 
         // loop over all moving pieces and move them
+        for (let pieceId in state.movingPieces) {
+          const piecePos = state.pieces[pieceId].position;
+          const newPosition = state.movingPieces[pieceId];
+          console.log("piecePos:", piecePos);
+          console.log("newPosition:", newPosition);
+          moveOccupiedCell(state, piecePos, newPosition);
+          state.pieces[pieceId].position.x = newPosition.x;
+          state.pieces[pieceId].position.y = newPosition.y;
+        }
 
         // loop over all pieces, and update moving pieces
         for (let pieceId in state.pieces) {
           const piece = state.pieces[pieceId];
 
+          // If cooldown is currently zero, reset and remove from moving pieces
           if (piece.cooldown === 0) {
             piece.cooldown = PieceCooldown[piece.type];
-            const newPosition = movingPieces[pieceId];
-            piece.position.x = newPosition.x;
-            piece.position.y = newPosition.y;
-            delete movingPieces[pieceId];
-          } else {
+            delete state.movingPieces[pieceId];
+          }
+
+          // Non-zero cooldown is reduced by
+          else {
             piece.cooldown -= 1;
+            // If cooldown is now zero, set for movement
+            // TODO: optimization for non-pawns to add capture cells here
             if (piece.cooldown === 0) {
-              // determine moves
+              console.log("PIECE WILL BE MOVING:", { ...piece });
+              console.log("OCCUPIED CELLS:", [...state.occupiedCells]);
+              const moveCells = PieceMovementFunc[piece.type](
+                piece.position,
+                currPlayerPos,
+                state.occupiedCells
+              );
+              console.log("PIECE MOVE CELLS:", moveCells);
+              state.movingPieces[pieceId] =
+                moveCells[Math.floor(Math.random() * moveCells.length)];
             }
           }
         }
+
+        // loop over all the NEW moving pieces and update capture cells
+        for (let pieceId in state.movingPieces) {
+          const piece = state.pieces[pieceId];
+          const pieceCaptureCells = PieceCaptureFunc[piece.type](
+            piece.position,
+            currPlayerPos,
+            state.occupiedCells
+          );
+          state.captureCells = state.captureCells.concat(pieceCaptureCells);
+        }
       },
     },
-
-    // movePieceTo: {
-    //   reducer(state, action) {
-    //     // TODO: Maybe verify if movement is valid?
-    //     const { pieceId, x, y } = action.payload;
-    //     state.pieces[pieceId].position.x = x;
-    //     state.pieces[pieceId].position.y = y;
-    //   },
-    //   prepare(pieceId, x, y) {
-    //     return {
-    //       payload: { pieceId, x, y },
-    //     };
-    //   },
-    // },
 
     // end of reducers
   },
@@ -129,12 +162,14 @@ const gameSlice = createSlice({
 // SELECT FUNCTIONS --------------------------------------
 export const selectPieceById = (pieceId) => (state) =>
   state.game.pieces[pieceId];
+export const selectAllPieces = (state) => state.game.pieces;
 export const selectCells = (state) => state.game.cells;
 export const selectPlayerPosition = (state) =>
   state.game.pieces[playerId].position;
 
 // ACTION EXPORTS --------------------------------------
-export const { movePlayer, resetState } = gameSlice.actions;
+export const { resetState, movePlayer, addPiece, processPieces } =
+  gameSlice.actions;
 export default gameSlice.reducer;
 
 //-------------------------------------- PRIVATE FUNCTIONS --------------------------------------

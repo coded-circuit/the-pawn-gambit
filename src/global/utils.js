@@ -1,3 +1,5 @@
+import { useSelector } from "react-redux";
+
 export const PieceType = {
   PLAYER: 0,
   QUEEN: 1,
@@ -30,39 +32,39 @@ export const PageName = {
 };
 
 export const PieceMovementFunc = {
-  [PieceType.PLAYER]: (x, y, playerPos, occupied) => {
+  [PieceType.PLAYER]: (pos, playerPos, occupied) => {
     assert(false, "Player does not have a movement function");
   },
-  [PieceType.QUEEN]: (x, y, playerPos, occupied) => {
+  [PieceType.QUEEN]: (pos, playerPos, occupied) => {
     return [].concat(
-      getMoveCellsByDirection(x, y, 1, 0, playerPos, occupied),
-      getMoveCellsByDirection(x, y, 1, 1, playerPos, occupied),
-      getMoveCellsByDirection(x, y, 0, 1, playerPos, occupied),
-      getMoveCellsByDirection(x, y, -1, 1, playerPos, occupied),
-      getMoveCellsByDirection(x, y, -1, 0, playerPos, occupied),
-      getMoveCellsByDirection(x, y, -1, -1, playerPos, occupied),
-      getMoveCellsByDirection(x, y, 0, -1, playerPos, occupied),
-      getMoveCellsByDirection(x, y, 1, -1, playerPos, occupied)
+      getMoveCellsByDirection(pos, 1, 0, playerPos, occupied),
+      getMoveCellsByDirection(pos, 1, 1, playerPos, occupied),
+      getMoveCellsByDirection(pos, 0, 1, playerPos, occupied),
+      getMoveCellsByDirection(pos, -1, 1, playerPos, occupied),
+      getMoveCellsByDirection(pos, -1, 0, playerPos, occupied),
+      getMoveCellsByDirection(pos, -1, -1, playerPos, occupied),
+      getMoveCellsByDirection(pos, 0, -1, playerPos, occupied),
+      getMoveCellsByDirection(pos, 1, -1, playerPos, occupied)
     );
   },
-  [PieceType.ROOK]: (x, y, playerPos, occupied) => {
+  [PieceType.ROOK]: (pos, playerPos, occupied) => {
     return [].concat(
-      getMoveCellsByDirection(x, y, 1, 0, playerPos, occupied),
-      getMoveCellsByDirection(x, y, 0, 1, playerPos, occupied),
-      getMoveCellsByDirection(x, y, -1, 0, playerPos, occupied),
-      getMoveCellsByDirection(x, y, 0, -1, playerPos, occupied)
+      getMoveCellsByDirection(pos, 1, 0, playerPos, occupied),
+      getMoveCellsByDirection(pos, 0, 1, playerPos, occupied),
+      getMoveCellsByDirection(pos, -1, 0, playerPos, occupied),
+      getMoveCellsByDirection(pos, 0, -1, playerPos, occupied)
     );
   },
-  [PieceType.BISHOP]: (x, y, playerPos, occupied) => {
+  [PieceType.BISHOP]: (pos, playerPos, occupied) => {
     return [].concat(
-      getMoveCellsByDirection(x, y, 1, 1, playerPos, occupied),
-      getMoveCellsByDirection(x, y, -1, 1, playerPos, occupied),
-      getMoveCellsByDirection(x, y, -1, -1, playerPos, occupied),
-      getMoveCellsByDirection(x, y, 1, -1, playerPos, occupied)
+      getMoveCellsByDirection(pos, 1, 1, playerPos, occupied),
+      getMoveCellsByDirection(pos, -1, 1, playerPos, occupied),
+      getMoveCellsByDirection(pos, -1, -1, playerPos, occupied),
+      getMoveCellsByDirection(pos, 1, -1, playerPos, occupied)
     );
   },
-  [PieceType.KNIGHT]: (x, y, playerPos, occupied) => {
-    return getMoveCellsByOffset(x, y, playerPos, occupied, [
+  [PieceType.KNIGHT]: (pos, playerPos, occupied) => {
+    return getMoveCellsByOffset(pos, playerPos, occupied, [
       { x: 1, y: 2 },
       { x: 2, y: 1 },
       { x: 2, y: -1 },
@@ -73,17 +75,17 @@ export const PieceMovementFunc = {
       { x: -1, y: 2 },
     ]);
   },
-  [PieceType.PAWN_N]: (x, y, playerPos, occupied) => {
-    return getMoveCellsByOffset(x, y, playerPos, occupied, [{ x: 0, y: -1 }]);
+  [PieceType.PAWN_N]: (pos, playerPos, occupied) => {
+    return getMoveCellsByOffset(pos, playerPos, occupied, [{ x: 0, y: -1 }]);
   },
-  [PieceType.PAWN_E]: (x, y, playerPos, occupied) => {
-    return getMoveCellsByOffset(x, y, playerPos, occupied, [{ x: 1, y: 0 }]);
+  [PieceType.PAWN_E]: (pos, playerPos, occupied) => {
+    return getMoveCellsByOffset(pos, playerPos, occupied, [{ x: 1, y: 0 }]);
   },
-  [PieceType.PAWN_W]: (x, y, playerPos, occupied) => {
-    return getMoveCellsByOffset(x, y, playerPos, occupied, [{ x: -1, y: 0 }]);
+  [PieceType.PAWN_W]: (pos, playerPos, occupied) => {
+    return getMoveCellsByOffset(pos, playerPos, occupied, [{ x: -1, y: 0 }]);
   },
-  [PieceType.PAWN_S]: (x, y, playerPos, occupied) => {
-    return getMoveCellsByOffset(x, y, playerPos, occupied, [{ x: 0, y: 1 }]);
+  [PieceType.PAWN_S]: (pos, playerPos, occupied) => {
+    return getMoveCellsByOffset(pos, playerPos, occupied, [{ x: 0, y: 1 }]);
   },
 };
 export const PieceCaptureFunc = {
@@ -92,26 +94,26 @@ export const PieceCaptureFunc = {
   [PieceType.ROOK]: PieceMovementFunc[PieceType.ROOK],
   [PieceType.BISHOP]: PieceMovementFunc[PieceType.BISHOP],
   [PieceType.KNIGHT]: PieceMovementFunc[PieceType.KNIGHT],
-  [PieceType.PAWN_N]: (x, y, playerPos, occupied) => {
-    return getMoveCellsByOffset(x, y, playerPos, occupied, [
+  [PieceType.PAWN_N]: (pos, playerPos, occupied) => {
+    return getMoveCellsByOffset(pos, playerPos, occupied, [
       { x: -1, y: -1 },
       { x: 1, y: -1 },
     ]);
   },
-  [PieceType.PAWN_E]: (x, y, playerPos, occupied) => {
-    return getMoveCellsByOffset(x, y, playerPos, occupied, [
+  [PieceType.PAWN_E]: (pos, playerPos, occupied) => {
+    return getMoveCellsByOffset(pos, playerPos, occupied, [
       { x: 1, y: -1 },
       { x: 1, y: 1 },
     ]);
   },
-  [PieceType.PAWN_W]: (x, y, playerPos, occupied) => {
-    return getMoveCellsByOffset(x, y, playerPos, occupied, [
+  [PieceType.PAWN_W]: (pos, playerPos, occupied) => {
+    return getMoveCellsByOffset(pos, playerPos, occupied, [
       { x: -1, y: -1 },
       { x: -1, y: 1 },
     ]);
   },
-  [PieceType.PAWN_S]: (x, y, playerPos, occupied) => {
-    return getMoveCellsByOffset(x, y, playerPos, occupied, [
+  [PieceType.PAWN_S]: (pos, playerPos, occupied) => {
+    return getMoveCellsByOffset(pos, playerPos, occupied, [
       { x: -1, y: 1 },
       { x: 1, y: 1 },
     ]);
@@ -173,9 +175,12 @@ export function sleep(ms) {
 }
 
 // ------------------------------------ MOVEMENT UTILITIES ------------------------------------
-function getMoveCellsByOffset(origX, origY, playerPos, obs, offsets) {
+function getMoveCellsByOffset(piecePos, playerPos, obs, offsets) {
+  assertIsVector(piecePos);
   assertIsVector(playerPos);
+  console.log("piecePos:", piecePos.x, piecePos.y);
   const obstacles = removeVectorInArray(obs, playerPos);
+  const { origX, origY } = piecePos;
 
   const output = [];
   offsets.forEach((offset) => {
@@ -188,9 +193,11 @@ function getMoveCellsByOffset(origX, origY, playerPos, obs, offsets) {
   return output;
 }
 
-function getMoveCellsByDirection(origX, origY, dirX, dirY, playerPos, obs) {
+function getMoveCellsByDirection(piecePos, dirX, dirY, playerPos, obs) {
+  assertIsVector(piecePos);
   assertIsVector(playerPos);
   const obstacles = removeVectorInArray(obs, playerPos);
+  const { origX, origY } = piecePos;
 
   const output = [];
   const currCell = { x: origX + dirX, y: origY + dirY };
@@ -202,7 +209,7 @@ function getMoveCellsByDirection(origX, origY, dirX, dirY, playerPos, obs) {
   return output;
 }
 
-function arrayHasVector(array, vector) {
+export function arrayHasVector(array, vector) {
   assertIsVector(vector);
   return (
     array.find((item) => item.x === vector.x && item.y === vector.y) !==
