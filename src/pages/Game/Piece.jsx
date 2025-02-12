@@ -45,7 +45,10 @@ const Piece = ({ gridPos, type }) => {
     case PieceType.KNIGHT:
       pieceComponent = <Knight />;
       break;
-    case PieceType.PAWN:
+    case PieceType.PAWN_N:
+    case PieceType.PAWN_E:
+    case PieceType.PAWN_W:
+    case PieceType.PAWN_S:
       pieceComponent = <Pawn />;
       break;
     default:

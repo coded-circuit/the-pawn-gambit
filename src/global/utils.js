@@ -4,7 +4,10 @@ export const PieceType = {
   ROOK: 2,
   BISHOP: 3,
   KNIGHT: 4,
-  PAWN: 5,
+  PAWN_N: 5,
+  PAWN_E: 6,
+  PAWN_W: 7,
+  PAWN_S: 8,
 };
 
 export const PieceCooldown = {
@@ -13,7 +16,10 @@ export const PieceCooldown = {
   [PieceType.ROOK]: 4,
   [PieceType.BISHOP]: 4,
   [PieceType.KNIGHT]: 3,
-  [PieceType.PAWN]: 3,
+  [PieceType.PAWN_N]: 2,
+  [PieceType.PAWN_E]: 2,
+  [PieceType.PAWN_W]: 2,
+  [PieceType.PAWN_S]: 2,
 };
 
 export const PageName = {
@@ -24,57 +30,92 @@ export const PageName = {
 };
 
 export const PieceMovementFunc = {
-  [PieceType.PLAYER]: (x, y, occupiedCells) => {
+  [PieceType.PLAYER]: (x, y, playerPos, occupied) => {
     assert(false, "Player does not have a movement function");
   },
-  [PieceType.QUEEN]: (x, y, occupiedCells) => {
+  [PieceType.QUEEN]: (x, y, playerPos, occupied) => {
     return [].concat(
-      getMoveCellsByDirection(x, y, 1, 0, occupiedCells),
-      getMoveCellsByDirection(x, y, 1, 1, occupiedCells),
-      getMoveCellsByDirection(x, y, 0, 1, occupiedCells),
-      getMoveCellsByDirection(x, y, -1, 1, occupiedCells),
-      getMoveCellsByDirection(x, y, -1, 0, occupiedCells),
-      getMoveCellsByDirection(x, y, -1, -1, occupiedCells),
-      getMoveCellsByDirection(x, y, 0, -1, occupiedCells),
-      getMoveCellsByDirection(x, y, 1, -1, occupiedCells)
+      getMoveCellsByDirection(x, y, 1, 0, playerPos, occupied),
+      getMoveCellsByDirection(x, y, 1, 1, playerPos, occupied),
+      getMoveCellsByDirection(x, y, 0, 1, playerPos, occupied),
+      getMoveCellsByDirection(x, y, -1, 1, playerPos, occupied),
+      getMoveCellsByDirection(x, y, -1, 0, playerPos, occupied),
+      getMoveCellsByDirection(x, y, -1, -1, playerPos, occupied),
+      getMoveCellsByDirection(x, y, 0, -1, playerPos, occupied),
+      getMoveCellsByDirection(x, y, 1, -1, playerPos, occupied)
     );
   },
-  [PieceType.ROOK]: (x, y, occupiedCells) => {
+  [PieceType.ROOK]: (x, y, playerPos, occupied) => {
     return [].concat(
-      getMoveCellsByDirection(x, y, 1, 0, occupiedCells),
-      getMoveCellsByDirection(x, y, 0, 1, occupiedCells),
-      getMoveCellsByDirection(x, y, -1, 0, occupiedCells),
-      getMoveCellsByDirection(x, y, 0, -1, occupiedCells)
+      getMoveCellsByDirection(x, y, 1, 0, playerPos, occupied),
+      getMoveCellsByDirection(x, y, 0, 1, playerPos, occupied),
+      getMoveCellsByDirection(x, y, -1, 0, playerPos, occupied),
+      getMoveCellsByDirection(x, y, 0, -1, playerPos, occupied)
     );
   },
-  [PieceType.BISHOP]: (x, y, occupiedCells) => {
+  [PieceType.BISHOP]: (x, y, playerPos, occupied) => {
     return [].concat(
-      getMoveCellsByDirection(x, y, 1, 1, occupiedCells),
-      getMoveCellsByDirection(x, y, -1, 1, occupiedCells),
-      getMoveCellsByDirection(x, y, -1, -1, occupiedCells),
-      getMoveCellsByDirection(x, y, 1, -1, occupiedCells)
+      getMoveCellsByDirection(x, y, 1, 1, playerPos, occupied),
+      getMoveCellsByDirection(x, y, -1, 1, playerPos, occupied),
+      getMoveCellsByDirection(x, y, -1, -1, playerPos, occupied),
+      getMoveCellsByDirection(x, y, 1, -1, playerPos, occupied)
     );
   },
-  [PieceType.KNIGHT]: (x, y, occupiedCells) => {
-    return [].concat(
-      getMoveCellsByOffset(
-        x,
-        y,
-        [
-          { x: 1, y: 2 },
-          { x: 2, y: 1 },
-          { x: 2, y: -1 },
-          { x: 1, y: -2 },
-          { x: -1, y: -2 },
-          { x: -2, y: -1 },
-          { x: -2, y: 1 },
-          { x: -1, y: 2 },
-        ],
-        occupiedCells
-      )
-    );
+  [PieceType.KNIGHT]: (x, y, playerPos, occupied) => {
+    return getMoveCellsByOffset(x, y, playerPos, occupied, [
+      { x: 1, y: 2 },
+      { x: 2, y: 1 },
+      { x: 2, y: -1 },
+      { x: 1, y: -2 },
+      { x: -1, y: -2 },
+      { x: -2, y: -1 },
+      { x: -2, y: 1 },
+      { x: -1, y: 2 },
+    ]);
   },
-  [PieceType.PAWN]: (x, y, occupiedCells) => {}, // TODO: Pawns
+  [PieceType.PAWN_N]: (x, y, playerPos, occupied) => {
+    return getMoveCellsByOffset(x, y, playerPos, occupied, [{ x: 0, y: -1 }]);
+  },
+  [PieceType.PAWN_E]: (x, y, playerPos, occupied) => {
+    return getMoveCellsByOffset(x, y, playerPos, occupied, [{ x: 1, y: 0 }]);
+  },
+  [PieceType.PAWN_W]: (x, y, playerPos, occupied) => {
+    return getMoveCellsByOffset(x, y, playerPos, occupied, [{ x: -1, y: 0 }]);
+  },
+  [PieceType.PAWN_S]: (x, y, playerPos, occupied) => {
+    return getMoveCellsByOffset(x, y, playerPos, occupied, [{ x: 0, y: 1 }]);
+  },
+};
+export const PieceCaptureFunc = {
+  [PieceType.PLAYER]: PieceMovementFunc[PieceType.PLAYER],
+  [PieceType.QUEEN]: PieceMovementFunc[PieceType.QUEEN],
+  [PieceType.ROOK]: PieceMovementFunc[PieceType.ROOK],
+  [PieceType.BISHOP]: PieceMovementFunc[PieceType.BISHOP],
+  [PieceType.KNIGHT]: PieceMovementFunc[PieceType.KNIGHT],
+  [PieceType.PAWN_N]: (x, y, playerPos, occupied) => {
+    return getMoveCellsByOffset(x, y, playerPos, occupied, [
+      { x: -1, y: -1 },
+      { x: 1, y: -1 },
+    ]);
+  },
+  [PieceType.PAWN_E]: (x, y, playerPos, occupied) => {
+    return getMoveCellsByOffset(x, y, playerPos, occupied, [
+      { x: 1, y: -1 },
+      { x: 1, y: 1 },
+    ]);
+  },
+  [PieceType.PAWN_W]: (x, y, playerPos, occupied) => {
+    return getMoveCellsByOffset(x, y, playerPos, occupied, [
+      { x: -1, y: -1 },
+      { x: -1, y: 1 },
+    ]);
+  },
+  [PieceType.PAWN_S]: (x, y, playerPos, occupied) => {
+    return getMoveCellsByOffset(x, y, playerPos, occupied, [
+      { x: -1, y: 1 },
+      { x: 1, y: 1 },
+    ]);
+  },
 };
 
 export const TRANSITION_HALF_LIFE = 750;
@@ -83,6 +124,7 @@ Object.freeze(PieceType);
 Object.freeze(PieceCooldown);
 Object.freeze(PageName);
 Object.freeze(PieceMovementFunc);
+Object.freeze(PieceCaptureFunc);
 
 // ------------------------------------ MATH UTILITIES ------------------------------------
 export function getDistance(v1, v2) {
@@ -131,19 +173,25 @@ export function sleep(ms) {
 }
 
 // ------------------------------------ MOVEMENT UTILITIES ------------------------------------
-function getMoveCellsByOffset(origX, origY, offsets, obstacles = []) {
+function getMoveCellsByOffset(origX, origY, playerPos, obs, offsets) {
+  assertIsVector(playerPos);
+  const obstacles = removeVectorInArray(obs, playerPos);
+
   const output = [];
   offsets.forEach((offset) => {
     assertIsVector(offset);
     const move = { x: origX + offset.x, y: origY + offset.y };
-    if (!arrayHasVector(obstacles, move) && isValidCell(move)) {
+    if (isValidCell(move) && !arrayHasVector(obstacles, move)) {
       output.push(move);
     }
   });
   return output;
 }
 
-function getMoveCellsByDirection(origX, origY, dirX, dirY, obstacles = []) {
+function getMoveCellsByDirection(origX, origY, dirX, dirY, playerPos, obs) {
+  assertIsVector(playerPos);
+  const obstacles = removeVectorInArray(obs, playerPos);
+
   const output = [];
   const currCell = { x: origX + dirX, y: origY + dirY };
   while (isValidCell(currCell) && !arrayHasVector(obstacles, currCell)) {
@@ -160,4 +208,11 @@ function arrayHasVector(array, vector) {
     array.find((item) => item.x === vector.x && item.y === vector.y) !==
     undefined
   );
+}
+
+function removeVectorInArray(array, vector) {
+  assertIsVector(vector);
+  return array.filter((item) => {
+    return item.x !== vector.x || item.y !== vector.y;
+  });
 }
