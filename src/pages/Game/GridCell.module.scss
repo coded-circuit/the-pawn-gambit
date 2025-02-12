@@ -1,17 +1,17 @@
-// .evenGridCell,
-// .oddGridCell {
-
-// }
-
-.evenGridCell,
-.oddGridCell {
-  // box-shadow: inset 0 0 2vmin rgba(0, 0, 0, 0.1);
-}
-
 .evenGridCell {
   background-color: theme.$cell-clr-1;
 }
 
 .oddGridCell {
   background-color: theme.$cell-clr-2;
+}
+
+.invisible {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.visible {
+  opacity: 1;
+  transition: opacity 0.2s;
 }

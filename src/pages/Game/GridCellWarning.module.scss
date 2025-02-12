@@ -1,0 +1,30 @@
+.gridCellWarning {
+  width: 80%;
+  height: 80%;
+  transform: translate(10%, 10%);
+  // animation: blink 1s linear infinite;
+}
+
+.warningFill {
+  animation: warningFillBlink 1s linear infinite;
+}
+
+@keyframes warningFillBlink {
+  0%,
+  100% {
+    fill: #d68d82;
+  }
+  50% {
+    fill: #d28479;
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}

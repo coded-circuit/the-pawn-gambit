@@ -104,21 +104,30 @@ const gameSlice = createSlice({
 
         // loop over all moving pieces and move them
         Object.keys(state.movingPieces).forEach((pieceId) => {
+          console.log("MOVING PIECE:", pieceId);
           const piecePos = state.pieces[pieceId].position;
           const newPosition = state.movingPieces[pieceId];
-          console.log("piecePos:", piecePos);
-          console.log("newPosition:", newPosition);
-          moveOccupiedCell(state, piecePos, newPosition);
-          state.pieces[pieceId].position.x = newPosition.x;
-          state.pieces[pieceId].position.y = newPosition.y;
+          if (
+            newPosition.x !== currPlayerPos.x &&
+            newPosition.y !== currPlayerPos.y
+          ) {
+            console.log("piecePos:", piecePos);
+            console.log("newPosition:", newPosition);
+            moveOccupiedCell(state, piecePos, newPosition);
+            state.pieces[pieceId].position.x = newPosition.x;
+            state.pieces[pieceId].position.y = newPosition.y;
+          } else {
+            console.log("A piece was blocked by the player!");
+          }
         });
 
         // loop over all pieces, and update moving pieces array
         const newOccupiedCells = extractOccupiedCells(
           state.occupiedCellsMatrix
         );
+        const nextTurnMoves = [];
         Object.keys(state.pieces).forEach((pieceId) => {
-          console.log("LOOPING OVER PIECES:", pieceId);
+          console.log("UPDATING PIECE:", pieceId);
           const piece = state.pieces[pieceId];
 
           // If cooldown is currently zero, reset and remove from moving pieces
@@ -127,28 +136,49 @@ const gameSlice = createSlice({
             delete state.movingPieces[pieceId];
           }
 
-          // Non-zero cooldown is reduced by
+          // Non-zero cooldown is reduced by one
           else {
             piece.cooldown -= 1;
-            // If cooldown is now zero, set for movement
             // TODO: optimization for non-pawns to add capture cells here
+            // If cooldown is now zero, set for movement
             if (piece.cooldown === 0) {
               console.log("PIECE WILL BE MOVING:", pieceId, { ...piece });
-              console.log("OCCUPIED CELLS:", [...occupiedCells]);
               const moveCells = PieceMovementFunc[piece.type](
                 piece.position,
                 currPlayerPos,
                 newOccupiedCells
               );
-              console.log("PIECE MOVE CELLS:", moveCells);
-              state.movingPieces[pieceId] =
-                moveCells[Math.floor(Math.random() * moveCells.length)];
+
+              // If the piece has a place to move to, find a tile that isn't already
+              // another piece's next move, by picking a random tile three times. If
+              // the piece can't move anywhere, either because it has reached the retry
+              // limit or moveCells is empty, move to itself
+              if (moveCells.length > 0) {
+                const maxRetries = 3;
+                let retry = 0;
+                let move = { ...piece.position };
+                while (retry < maxRetries) {
+                  const newMove =
+                    moveCells[Math.floor(Math.random() * moveCells.length)];
+                  if (!arrayHasVector(nextTurnMoves, newMove)) {
+                    move = newMove;
+                    break;
+                  }
+                  retry++;
+                }
+                nextTurnMoves.push(move);
+                state.movingPieces[pieceId] = move;
+              } else {
+                let move = { ...piece.position };
+                nextTurnMoves.push(move);
+                state.movingPieces[pieceId] = move;
+              }
             }
           }
         });
 
         // loop over all the NEW moving pieces and update capture cells
-        state.captureCells = []
+        state.captureCells = [];
         Object.keys(state.movingPieces).forEach((pieceId) => {
           const piece = state.pieces[pieceId];
           const pieceCaptureCells = PieceCaptureFunc[piece.type](
@@ -169,7 +199,9 @@ const gameSlice = createSlice({
 export const selectPieceById = (pieceId) => (state) =>
   state.game.pieces[pieceId];
 export const selectAllPieces = (state) => state.game.pieces;
-export const selectOccupiedCellsMatrix = (state) => state.game.occupiedCellsMatrix
+export const selectOccupiedCellsMatrix = (state) =>
+  state.game.occupiedCellsMatrix;
+export const selectCaptureCells = (state) => state.game.captureCells;
 export const selectPlayerPosition = (state) => state.game.player.position;
 
 // ACTION EXPORTS --------------------------------------
@@ -189,6 +221,11 @@ function moveOccupiedCell(state, v1, v2) {
   console.log("MOVING:", v1, v2);
   assertIsVector(v1);
   assertIsVector(v2);
+  if (v1.x === v2.x && v1.y === v2.y) {
+    console.log("Moving to the same cell", v1, v2);
+    return;
+  }
+
   assert(state.occupiedCellsMatrix[v1.y][v1.x], "Moving a non-occupied cell!");
   state.occupiedCellsMatrix[v1.y][v1.x] = false;
   assert(

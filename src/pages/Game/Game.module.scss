@@ -27,7 +27,7 @@ $grid-border-thickness: 3vmin;
     background-image: linear-gradient(
       90deg,
       $shadow-clr,
-      transparent $grid-border-outer-radius / 2,
+      transparent calc($grid-border-outer-radius / 2),
       transparent calc(100% - $grid-border-outer-radius / 2),
       $shadow-clr
     );

@@ -57,8 +57,8 @@ const Piece = ({ gridPos, type }) => {
 
   return (
     <div className={styles.piece} style={gfxPlayerStyles}>
-      <div className={isMoving ? styles.jumpReference : ""}>
-        {pieceComponent}
+      <div className={isMoving ? `${styles.jumpReference} ${styles.jumping}` : styles.jumpReference}>
+        <div className={styles.danceReference}>{pieceComponent}</div>
       </div>
       <Shadow isMoving={isMoving} />
     </div>

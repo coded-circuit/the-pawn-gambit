@@ -5,27 +5,21 @@
   transition: all 0.2s;
 }
 
-// .shadow {
-//   position: absolute;
-//   bottom: 0;
-//   left: 0;
-//   height: 100%;
-//   width: 100%;
-//   background-image: radial-gradient(
-//     70% 40% at 50% 70%,
-//     theme.$dark-clr-trans,
-//     theme.$dark-clr-trans 50%,
-//     transparent 50%
-//   );
-//   z-index: -1;
-// }
-
-.jumpReference {
+.jumpReference,
+.danceReference {
   width: 100%;
   height: 100%;
   position: relative;
   bottom: 0;
   left: 0;
+}
+
+.danceReference {
+  transform-origin: 50% 80%;
+  animation: dance 1s infinite;
+}
+
+.jumping {
   animation: jump 0.2s;
 }
 
@@ -37,5 +31,18 @@
 
   50% {
     bottom: 3vmin;
+  }
+}
+
+@keyframes dance {
+  0%,
+  25%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  50%,
+  75% {
+    transform: scaleY(0.95) scaleX(1.05);
   }
 }

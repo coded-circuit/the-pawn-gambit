@@ -12,6 +12,7 @@ import {
   addPiece,
   selectAllPieces,
   selectOccupiedCellsMatrix,
+  selectCaptureCells,
 } from "../../data/gameSlice";
 import {
   getVectorSum,
@@ -23,13 +24,13 @@ import Piece from "./Piece";
 import { nanoid } from "@reduxjs/toolkit";
 
 // Initialize the grid cells
-const gridCells = new Array(8).fill(null).map(() => new Array(8).fill(null));
-for (let y = 0; y < 8; y++) {
-  for (let x = 0; x < 8; x++) {
-    const i = x + y * 8;
-    gridCells[y][x] = <GridCell key={i} pos={{ x, y }} />;
-  }
-}
+// const gridCells = new Array(8).fill(null).map(() => new Array(8).fill(null));
+// for (let y = 0; y < 8; y++) {
+//   for (let x = 0; x < 8; x++) {
+//     const i = x + y * 8;
+//     gridCells[y][x] = <GridCell key={i} pos={{ x, y }} />;
+//   }
+// }
 
 const Game = () => {
   const dispatch = useDispatch();
@@ -37,6 +38,7 @@ const Game = () => {
   const processing = useRef(false);
   const pieces = useSelector(selectAllPieces);
   const occupiedCellsMatrix = useSelector(selectOccupiedCellsMatrix);
+  const captureCells = useSelector(selectCaptureCells);
 
   // TEST
   const playerPosition = useSelector(selectPlayerPosition);
@@ -51,8 +53,14 @@ const Game = () => {
     (async () => {
       await sleep(600);
       dispatch(resetState());
-      dispatch(addPiece(1, 0, PieceType.KNIGHT));
-      dispatch(addPiece(3, 1, PieceType.QUEEN));
+      dispatch(addPiece(0, 0, PieceType.PAWN_E));
+      dispatch(addPiece(3, 0, PieceType.PAWN_S));
+      dispatch(addPiece(1, 1, PieceType.KNIGHT));
+      dispatch(addPiece(1, 4, PieceType.QUEEN));
+      dispatch(addPiece(6, 7, PieceType.ROOK));
+      // dispatch(addPiece(3, 1, PieceType.QUEEN));
+      // dispatch(addPiece(7, 6, PieceType.ROOK));
+      // dispatch(addPiece(0, 5, PieceType.PAWN_E));
     })();
   }, []);
 
@@ -106,6 +114,21 @@ const Game = () => {
         gridPos={pieces[pieceId].position}
         type={pieces[pieceId].type}
       />
+    );
+  });
+
+  const gridCells = new Array(8).fill(null).map(() => new Array(8).fill(null));
+  for (let y = 0; y < 8; y++) {
+    for (let x = 0; x < 8; x++) {
+      gridCells[y][x] = (
+        <GridCell key={x + y * 8} pos={{ x, y }} isCapture={false} />
+      );
+    }
+  }
+  captureCells.forEach((cell) => {
+    const { x, y } = cell;
+    gridCells[y][x] = (
+      <GridCell key={x + y * 8} pos={{ x, y }} isCapture={true} />
     );
   });
 
