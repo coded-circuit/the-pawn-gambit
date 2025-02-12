@@ -64,6 +64,7 @@ export const PieceMovementFunc = {
     );
   },
   [PieceType.KNIGHT]: (pos, playerPos, occupied) => {
+    console.log("KNIGHT MOVES!");
     return getMoveCellsByOffset(pos, playerPos, occupied, [
       { x: 1, y: 2 },
       { x: 2, y: 1 },
@@ -178,9 +179,8 @@ export function sleep(ms) {
 function getMoveCellsByOffset(piecePos, playerPos, obs, offsets) {
   assertIsVector(piecePos);
   assertIsVector(playerPos);
-  console.log("piecePos:", piecePos.x, piecePos.y);
   const obstacles = removeVectorInArray(obs, playerPos);
-  const { origX, origY } = piecePos;
+  const { x: origX, y: origY } = piecePos;
 
   const output = [];
   offsets.forEach((offset) => {
@@ -197,7 +197,7 @@ function getMoveCellsByDirection(piecePos, dirX, dirY, playerPos, obs) {
   assertIsVector(piecePos);
   assertIsVector(playerPos);
   const obstacles = removeVectorInArray(obs, playerPos);
-  const { origX, origY } = piecePos;
+  const { x: origX, y: origY } = piecePos;
 
   const output = [];
   const currCell = { x: origX + dirX, y: origY + dirY };
@@ -223,3 +223,6 @@ function removeVectorInArray(array, vector) {
     return item.x !== vector.x || item.y !== vector.y;
   });
 }
+console.log(
+  PieceMovementFunc[PieceType.KNIGHT]({ x: 1, y: 0 }, { x: 5, y: 5 }, [])
+);

@@ -35,29 +35,32 @@ const Game = () => {
   const input = useInputs();
   const processing = useRef(false);
   const pieces = useSelector(selectAllPieces);
-  const currState = useSelector((state) => state.game);
+  const currState = useSelector((state) => state);
 
   // TEST
   const playerPosition = useSelector(selectPlayerPosition);
   const knightPosition = useRef({ x: 2, y: 0 });
 
   // DEBUG
-  useEffect(() => {
-    console.log(playerPosition);
-  }, [playerPosition]);
+  // useEffect(() => {
+  //   console.log(playerPosition);
+  // }, [playerPosition]);
 
   // Initialize game
   useEffect(() => {
-    dispatch(resetState());
-    dispatch(addPiece(0, 0, PieceType.KNIGHT));
-    console.log("CURRENT STATE:", currState);
+    (async () => {
+      await sleep(500);
+      dispatch(resetState());
+      dispatch(addPiece(1, 0, PieceType.KNIGHT));
+      console.log("CURRENT STATE:", currState);
+    })();
   }, []);
 
   // Handle Input
   useEffect(() => {
     // TODO: stop input for a few seconds when starting game
     if (input === "" || input === undefined || processing.current) return;
-    console.log("INPUT:", input);
+    // console.log("INPUT:", input);
 
     let direction = { x: 0, y: 0 };
     switch (input) {
@@ -94,10 +97,13 @@ const Game = () => {
   let pieceElements;
   console.log("Pieces updated!");
   pieceElements = Object.keys(pieces).map((pieceId) => {
-    console.log("Looping over pieces, piece:", pieces[pieceId]);
-    if (pieces[pieceId].type === 0) return <></>;
+    // console.log("Looping over pieces, piece:", pieces[pieceId]);
     return (
-      <Piece key={pieceId} gridPos={pieces[pieceId].position} type={pieces[pieceId].type} />
+      <Piece
+        key={pieceId}
+        gridPos={pieces[pieceId].position}
+        type={pieces[pieceId].type}
+      />
     );
   });
 

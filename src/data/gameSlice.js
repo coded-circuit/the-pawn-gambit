@@ -12,15 +12,14 @@ import {
 } from "../global/utils";
 
 const playerSpawnPos = { x: 3, y: 4 };
-const playerId = nanoid();
 const initialState = {
   // pieceId: { position, type, cooldown }
-  pieces: {
-    [playerId]: {
-      position: { ...playerSpawnPos },
-      type: PieceType.PLAYER,
-      cooldown: null,
-    },
+  pieces: {},
+
+  player: {
+    position: { ...playerSpawnPos },
+    type: PieceType.PLAYER,
+    cooldown: null,
   },
 
   // pieceId: { x, y }
@@ -30,9 +29,9 @@ const initialState = {
   captureCells: [],
 
   // 2d boolean matrix
-  occupiedCells: new Array(8).fill().map(() => new Array(8).fill(false)),
+  occupiedCellsMatrix: new Array(8).fill().map(() => new Array(8).fill(false)),
 };
-initialState.occupiedCells[playerSpawnPos.y][playerSpawnPos.x] = true;
+initialState.occupiedCellsMatrix[playerSpawnPos.y][playerSpawnPos.x] = true;
 
 const gameSlice = createSlice({
   name: "game",
@@ -47,12 +46,12 @@ const gameSlice = createSlice({
     movePlayer: {
       reducer(state, action) {
         const { x, y } = action.payload;
-        const currPosition = state.pieces[playerId].position;
+        const currPosition = state.player.position;
         const newPosition = getVectorSum(currPosition, { x, y });
         verifyPlayerMovement(currPosition, newPosition);
         moveOccupiedCell(state, currPosition, newPosition);
-        state.pieces[playerId].position.x = newPosition.x;
-        state.pieces[playerId].position.y = newPosition.y;
+        state.player.position.x = newPosition.x;
+        state.player.position.y = newPosition.y;
       },
       prepare(x, y) {
         return { payload: { x, y } };
@@ -63,7 +62,7 @@ const gameSlice = createSlice({
       reducer(state, action) {
         const { x, y, type } = action.payload;
         assert(
-          !state.occupiedCells[y][x],
+          !state.occupiedCellsMatrix[y][x],
           "Trying to add a piece to an occupied cell"
         );
         assert(type !== PieceType.PLAYER, "Trying to add a new player!");
@@ -75,7 +74,8 @@ const gameSlice = createSlice({
           cooldown: PieceCooldown[type],
         };
         state.pieces[pieceId] = newPiece;
-        console.log("ADDED NEW PIECE!", newPiece);
+        state.occupiedCellsMatrix[y][x] = true;
+        console.log("ADDED NEW PIECE!", pieceId, newPiece);
       },
       prepare(x, y, type) {
         // TODO: ID input might be replaced
@@ -84,25 +84,26 @@ const gameSlice = createSlice({
     },
 
     processPieces: {
-      reducer(state, action) {
-        const currPlayerPos = state.pieces[playerId].position;
+      reducer(state) {
+        const currPlayerPos = state.player.position;
 
         // loop over all moving pieces and check for captures
-        for (let pieceId in state.movingPieces) {
+        const occupiedCells = extractOccupiedCells(state.occupiedCellsMatrix);
+        Object.keys(state.movingPieces).forEach((pieceId) => {
           const piece = state.pieces[pieceId];
           const pieceCaptureCells = PieceCaptureFunc[piece.type](
             piece.position,
             currPlayerPos,
-            state.occupiedCells
+            occupiedCells
           );
           if (arrayHasVector(pieceCaptureCells, currPlayerPos)) {
             alert("GAME OVER"); // GAME OVER
             return state;
           }
-        }
+        });
 
         // loop over all moving pieces and move them
-        for (let pieceId in state.movingPieces) {
+        Object.keys(state.movingPieces).forEach((pieceId) => {
           const piecePos = state.pieces[pieceId].position;
           const newPosition = state.movingPieces[pieceId];
           console.log("piecePos:", piecePos);
@@ -110,10 +111,14 @@ const gameSlice = createSlice({
           moveOccupiedCell(state, piecePos, newPosition);
           state.pieces[pieceId].position.x = newPosition.x;
           state.pieces[pieceId].position.y = newPosition.y;
-        }
+        });
 
-        // loop over all pieces, and update moving pieces
-        for (let pieceId in state.pieces) {
+        // loop over all pieces, and update moving pieces array
+        const newOccupiedCells = extractOccupiedCells(
+          state.occupiedCellsMatrix
+        );
+        Object.keys(state.pieces).forEach((pieceId) => {
+          console.log("LOOPING OVER PIECES:", pieceId);
           const piece = state.pieces[pieceId];
 
           // If cooldown is currently zero, reset and remove from moving pieces
@@ -128,30 +133,30 @@ const gameSlice = createSlice({
             // If cooldown is now zero, set for movement
             // TODO: optimization for non-pawns to add capture cells here
             if (piece.cooldown === 0) {
-              console.log("PIECE WILL BE MOVING:", { ...piece });
-              console.log("OCCUPIED CELLS:", [...state.occupiedCells]);
+              console.log("PIECE WILL BE MOVING:", pieceId, { ...piece });
+              console.log("OCCUPIED CELLS:", [...occupiedCells]);
               const moveCells = PieceMovementFunc[piece.type](
                 piece.position,
                 currPlayerPos,
-                state.occupiedCells
+                newOccupiedCells
               );
               console.log("PIECE MOVE CELLS:", moveCells);
               state.movingPieces[pieceId] =
                 moveCells[Math.floor(Math.random() * moveCells.length)];
             }
           }
-        }
+        });
 
         // loop over all the NEW moving pieces and update capture cells
-        for (let pieceId in state.movingPieces) {
+        Object.keys(state.movingPieces).forEach((pieceId) => {
           const piece = state.pieces[pieceId];
           const pieceCaptureCells = PieceCaptureFunc[piece.type](
             piece.position,
             currPlayerPos,
-            state.occupiedCells
+            newOccupiedCells
           );
           state.captureCells = state.captureCells.concat(pieceCaptureCells);
-        }
+        });
       },
     },
 
@@ -164,8 +169,7 @@ export const selectPieceById = (pieceId) => (state) =>
   state.game.pieces[pieceId];
 export const selectAllPieces = (state) => state.game.pieces;
 export const selectCells = (state) => state.game.cells;
-export const selectPlayerPosition = (state) =>
-  state.game.pieces[playerId].position;
+export const selectPlayerPosition = (state) => state.game.player.position;
 
 // ACTION EXPORTS --------------------------------------
 export const { resetState, movePlayer, addPiece, processPieces } =
@@ -184,11 +188,23 @@ function moveOccupiedCell(state, v1, v2) {
   console.log("MOVING:", v1, v2);
   assertIsVector(v1);
   assertIsVector(v2);
-  assert(state.occupiedCells[v1.y][v1.x], "Moving a non-occupied cell!");
-  state.occupiedCells[v1.y][v1.x] = false;
+  assert(state.occupiedCellsMatrix[v1.y][v1.x], "Moving a non-occupied cell!");
+  state.occupiedCellsMatrix[v1.y][v1.x] = false;
   assert(
-    state.occupiedCells[v1.y][v1.x] === false,
+    state.occupiedCellsMatrix[v1.y][v1.x] === false,
     "Moving to an occupied cell!"
   );
-  state.occupiedCells[v2.y][v2.x] = true;
+  state.occupiedCellsMatrix[v2.y][v2.x] = true;
+}
+
+function extractOccupiedCells(matrix) {
+  const output = [];
+  for (let y = 0; y < 8; y++) {
+    for (let x = 0; x < 8; x++) {
+      if (matrix[y][x]) {
+        output.push({ x, y });
+      }
+    }
+  }
+  return output;
 }
