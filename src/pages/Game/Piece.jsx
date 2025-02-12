@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { assertIsVector, sleep } from "../../global/utils";
+import { assert, assertIsVector, PieceType, sleep } from "../../global/utils";
 import styles from "./Piece.module.scss";
 import Knight from "./PieceComponents/Knight";
 import Queen from "./PieceComponents/Queen";
@@ -7,6 +7,7 @@ import Shadow from "./PieceComponents/Shadow";
 import Bishop from "./PieceComponents/Bishop";
 import Rook from "./PieceComponents/Rook";
 import Pawn from "./PieceComponents/Pawn";
+import Player from "./PieceComponents/Player";
 
 const Piece = ({ gridPos, type }) => {
   assertIsVector(gridPos);
@@ -14,10 +15,9 @@ const Piece = ({ gridPos, type }) => {
   const [isMoving, setIsMoving] = useState(false);
 
   const gfxPlayerStyles = {
-    // backgroundImage:
-    //   "radial-gradient(70% 40% at 50% 70%, black, black 50%, transparent 50%)",
     top: (gridPos.y * 65) / 8 + "vmin",
     left: (gridPos.x * 65) / 8 + "vmin",
+    zIndex: gridPos.y * 8 + gridPos.x,
   };
 
   useEffect(() => {
@@ -28,10 +28,34 @@ const Piece = ({ gridPos, type }) => {
     })();
   }, [gridPos]);
 
+  let pieceComponent;
+  switch (type) {
+    case PieceType.PLAYER:
+      pieceComponent = <Player />;
+      break;
+    case PieceType.QUEEN:
+      pieceComponent = <Queen />;
+      break;
+    case PieceType.ROOK:
+      pieceComponent = <Rook />;
+      break;
+    case PieceType.BISHOP:
+      pieceComponent = <Bishop />;
+      break;
+    case PieceType.KNIGHT:
+      pieceComponent = <Knight />;
+      break;
+    case PieceType.PAWN:
+      pieceComponent = <Pawn />;
+      break;
+    default:
+      assert(false, "Invalid type in Piece.jsx!");
+  }
+
   return (
-    <div className={`${styles.piece}`} style={gfxPlayerStyles}>
+    <div className={styles.piece} style={gfxPlayerStyles}>
       <div className={isMoving ? styles.jumpReference : ""}>
-        <Pawn />
+        {pieceComponent}
       </div>
       <Shadow isMoving={isMoving} />
     </div>

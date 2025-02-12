@@ -37,11 +37,11 @@ const gameSlice = createSlice({
   name: "game",
   initialState,
   reducers: {
-    // resetState: {
-    //   reducer(state) {
-    //     return initialState;
-    //   },
-    // },
+    resetState: {
+      reducer(state) {
+        return initialState;
+      },
+    },
     // setOccupiedCell: {
     //   reducer(state, action) {
     //     const { x, y, value } = action.payload;
@@ -134,15 +134,18 @@ const gameSlice = createSlice({
   },
 });
 
+// SELECT FUNCTIONS --------------------------------------
 export const selectPieceById = (pieceId) => (state) =>
   state.game.pieces[pieceId];
 export const selectCells = (state) => state.game.cells;
 export const selectPlayerPosition = (state) =>
   state.game.pieces[playerId].position;
 
-export const { movePlayer } = gameSlice.actions;
+// ACTION EXPORTS --------------------------------------
+export const { movePlayer, resetState } = gameSlice.actions;
 export default gameSlice.reducer;
 
+//-------------------------------------- PRIVATE FUNCTIONS --------------------------------------
 function verifyPlayerMovement(v1, v2) {
   assertIsVector(v1);
   assertIsVector(v2);

@@ -1,11 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import useInputs from "../../hooks/useInputs";
 import GameUI from "./GameUI";
 import styles from "./Game.module.scss";
 import GridCell from "./GridCell";
-import { movePlayer, selectPlayerPosition } from "../../data/gameSlice";
-import { getVectorSum, isValidCell, PieceType } from "../../global/utils";
+import {
+  movePlayer,
+  selectPlayerPosition,
+  resetState,
+} from "../../data/gameSlice";
+import {
+  getVectorSum,
+  isValidCell,
+  PieceType,
+  sleep,
+} from "../../global/utils";
 import Piece from "./Piece";
 
 // Initialize the grid cells
@@ -19,15 +28,27 @@ for (let y = 0; y < 8; y++) {
 
 const Game = () => {
   const dispatch = useDispatch();
+  const input = useInputs();
+  const processing = useRef(false);
+
   // TEST
   const playerPosition = useSelector(selectPlayerPosition);
-  const input = useInputs();
+  const knightPosition = useRef({ x: 2, y: 0 });
+
+  // DEBUG
+  useEffect(() => {
+    console.log(playerPosition);
+  }, [playerPosition]);
+
+  // Initialize game
+  useEffect(() => {
+    dispatch(resetState());
+  }, []);
 
   // Handle Input
   useEffect(() => {
     // TODO: stop input for a few seconds when starting game
-    // console.log(input);
-    if (input === "") return;
+    if (input === "" || input === undefined || processing.current) return;
     console.log("INPUT:", input);
 
     let direction = { x: 0, y: 0 };
@@ -49,19 +70,14 @@ const Game = () => {
       return;
     }
     if (isValidCell(getVectorSum(playerPosition, direction))) {
-      dispatch(movePlayer(direction.x, direction.y));
+      (async () => {
+        processing.current = true;
+        dispatch(movePlayer(direction.x, direction.y));
+        await sleep(300);
+        processing.current = false;
+      })();
     }
   }, [input]);
-
-  // TEST
-  useEffect(() => {
-    console.log(playerPosition);
-  }, [playerPosition]);
-
-  //Initialize game
-  useEffect(() => {
-    // dispatch(resetState());
-  }, []);
 
   return (
     <main>
@@ -71,7 +87,8 @@ const Game = () => {
       <div className={styles.gridContainer}>{gridCells}</div>
       <div className={styles.piecesContainer}>
         {/* TEST */}
-        <Piece gridPos={playerPosition} type={PieceType.KNIGHT} />
+        <Piece gridPos={playerPosition} type={PieceType.PLAYER} />
+        <Piece gridPos={knightPosition.current} type={PieceType.KNIGHT} />
       </div>
     </main>
   );

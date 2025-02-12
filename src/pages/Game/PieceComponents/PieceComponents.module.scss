@@ -1,3 +1,4 @@
+.player,
 .pawn,
 .knight,
 .rook,
@@ -6,6 +7,10 @@
   width: calc(theme.$grid-scale / 8 * 0.7);
   position: absolute;
   bottom: calc(theme.$grid-scale / 8 * 0.25);
+
+  &.player {
+    left: calc(theme.$grid-scale / 8 * 0.15);
+  }
 
   &.pawn {
     left: calc(theme.$grid-scale / 8 * 0.15);
