@@ -11,6 +11,7 @@ import {
   processPieces,
   addPiece,
   selectAllPieces,
+  selectOccupiedCellsMatrix,
 } from "../../data/gameSlice";
 import {
   getVectorSum,
@@ -35,11 +36,10 @@ const Game = () => {
   const input = useInputs();
   const processing = useRef(false);
   const pieces = useSelector(selectAllPieces);
-  const currState = useSelector((state) => state);
+  const occupiedCellsMatrix = useSelector(selectOccupiedCellsMatrix);
 
   // TEST
   const playerPosition = useSelector(selectPlayerPosition);
-  const knightPosition = useRef({ x: 2, y: 0 });
 
   // DEBUG
   // useEffect(() => {
@@ -49,10 +49,10 @@ const Game = () => {
   // Initialize game
   useEffect(() => {
     (async () => {
-      await sleep(500);
+      await sleep(600);
       dispatch(resetState());
       dispatch(addPiece(1, 0, PieceType.KNIGHT));
-      console.log("CURRENT STATE:", currState);
+      dispatch(addPiece(3, 1, PieceType.QUEEN));
     })();
   }, []);
 
@@ -80,7 +80,10 @@ const Game = () => {
     if (direction.x === 0 && direction.y === 0) {
       return;
     }
-    if (isValidCell(getVectorSum(playerPosition, direction))) {
+
+    const movingTo = getVectorSum(playerPosition, direction);
+    if (occupiedCellsMatrix[movingTo.y][movingTo.x]) return; // TODO: Add attack logic
+    if (isValidCell(movingTo)) {
       (async () => {
         processing.current = true;
         dispatch(movePlayer(direction.x, direction.y));
@@ -89,13 +92,12 @@ const Game = () => {
         dispatch(processPieces());
         await sleep(250);
         processing.current = false;
-        console.log("CURRENT STATE:", currState);
       })();
     }
   }, [input]);
 
   let pieceElements;
-  console.log("Pieces updated!");
+  console.log("Something updated!");
   pieceElements = Object.keys(pieces).map((pieceId) => {
     // console.log("Looping over pieces, piece:", pieces[pieceId]);
     return (

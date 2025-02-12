@@ -148,6 +148,7 @@ const gameSlice = createSlice({
         });
 
         // loop over all the NEW moving pieces and update capture cells
+        state.captureCells = []
         Object.keys(state.movingPieces).forEach((pieceId) => {
           const piece = state.pieces[pieceId];
           const pieceCaptureCells = PieceCaptureFunc[piece.type](
@@ -168,7 +169,7 @@ const gameSlice = createSlice({
 export const selectPieceById = (pieceId) => (state) =>
   state.game.pieces[pieceId];
 export const selectAllPieces = (state) => state.game.pieces;
-export const selectCells = (state) => state.game.cells;
+export const selectOccupiedCellsMatrix = (state) => state.game.occupiedCellsMatrix
 export const selectPlayerPosition = (state) => state.game.player.position;
 
 // ACTION EXPORTS --------------------------------------
