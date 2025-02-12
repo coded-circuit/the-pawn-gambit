@@ -3,6 +3,7 @@ $acc-clr-2: #714849;
 $acc-clr-3: #e6a459;
 
 $dark-clr-1: #3d3d3d;
+$dark-clr-trans: #3d3d3d91;
 
 $light-clr-1: #fae6ce;
 $light-clr-2: #dfc19d;
@@ -16,9 +17,13 @@ $checker-scale: 6rem;
 
 $z-ind-transition: 99;
 $z-ind-game-ui: 90;
+$z-ind-grid-pieces: 5;
+$z-ind-grid-pieces-shadow: 4;
 $z-ind-grid: 3;
 $z-ind-grid-border: 2;
 $z-ind-grid-trunk: 1;
+
+$grid-scale: 65vmin;
 
 @font-face {
   font-family: "ConcertOne";

@@ -1,53 +1,58 @@
-$grid-scale: 65;
 $grid-border-outer-radius: 4vmin;
 $grid-border-inner-radius: 2vmin;
 $grid-border-thickness: 3vmin;
 
 .graphicsGridBorder,
 .graphicsGridTrunk {
-  width: calc($grid-scale * 1vmin + $grid-border-thickness * 2);
-  height: calc($grid-scale * 1vmin + $grid-border-thickness * 2);
+  width: calc(theme.$grid-scale + $grid-border-thickness * 2);
+  height: calc(theme.$grid-scale + $grid-border-thickness * 2);
   position: absolute;
-  top: calc(45vh - $grid-scale * 1vmin / 2 - $grid-border-thickness);
-  left: calc(50vw - $grid-scale * 1vmin / 2 - $grid-border-thickness);
+  top: calc(45vh - theme.$grid-scale / 2 - $grid-border-thickness);
+  left: calc(50vw - theme.$grid-scale / 2 - $grid-border-thickness);
+  border-radius: $grid-border-outer-radius;
+
+  &.graphicsGridBorder {
+    z-index: theme.$z-ind-grid-border;
+    background-color: theme.$acc-clr-1;
+    // background-color: transparent;
+    // border: 3rem solid theme.$acc-clr-1;
+  }
+
+  &.graphicsGridTrunk {
+    z-index: theme.$z-ind-grid-trunk;
+    background-color: theme.$acc-clr-2;
+
+    height: 100vh;
+    $shadow-clr: rgba(0, 0, 0, 0.147);
+    background-image: linear-gradient(
+      90deg,
+      $shadow-clr,
+      transparent $grid-border-outer-radius / 2,
+      transparent calc(100% - $grid-border-outer-radius / 2),
+      $shadow-clr
+    );
+  }
 }
 
+.piecesContainer,
 .gridContainer {
-  width: calc($grid-scale * 1vmin);
-  height: calc($grid-scale * 1vmin);
+  width: calc(theme.$grid-scale);
+  height: calc(theme.$grid-scale);
   position: absolute;
-  top: calc(45vh - $grid-scale * 1vmin / 2);
-  left: calc(50vw - $grid-scale * 1vmin / 2);
+  top: calc(45vh - theme.$grid-scale / 2);
+  left: calc(50vw - theme.$grid-scale / 2);
 
-  border-radius: $grid-border-inner-radius;
-  z-index: theme.$z-ind-grid;
-  overflow: hidden;
+  &.gridContainer {
+    border-radius: $grid-border-inner-radius;
+    z-index: theme.$z-ind-grid;
+    overflow: hidden;
 
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  grid-template-rows: repeat(8, 1fr);
-}
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+  }
 
-.graphicsGridBorder {
-  z-index: theme.$z-ind-grid-border;
-  background-color: theme.$acc-clr-1;
-  // background-color: transparent;
-  // border: 3rem solid theme.$acc-clr-1;
-  border-radius: $grid-border-outer-radius;
-}
-
-.graphicsGridTrunk {
-  height: 100vh;
-  z-index: theme.$z-ind-grid-trunk;
-  background-color: theme.$acc-clr-2;
-  $shadow-clr: rgba(0, 0, 0, 0.147);
-  background-image: linear-gradient(
-    90deg,
-    $shadow-clr,
-    transparent $grid-border-outer-radius / 2,
-    transparent calc(100% - $grid-border-outer-radius / 2),
-    $shadow-clr
-  );
-
-  border-radius: $grid-border-outer-radius;
+  &.piecesContainer {
+    z-index: theme.$z-ind-grid-pieces;
+  }
 }

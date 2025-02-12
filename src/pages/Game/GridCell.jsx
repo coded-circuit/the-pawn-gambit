@@ -7,7 +7,7 @@ const GridCell = ({ pos }) => {
   const shouldBeEven = onEvenY ? onEvenX : !onEvenX;
   return (
     <div className={shouldBeEven ? styles.evenGridCell : styles.oddGridCell}>
-      {pos.x + pos.y * 8}
+      {/* {pos.x + pos.y * 8} */}
     </div>
   );
 };

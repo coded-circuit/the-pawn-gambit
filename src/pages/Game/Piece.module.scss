@@ -1,0 +1,41 @@
+.piece {
+  position: relative;
+  width: calc(theme.$grid-scale / 8);
+  height: calc(theme.$grid-scale / 8);
+  transition: all 0.2s;
+}
+
+// .shadow {
+//   position: absolute;
+//   bottom: 0;
+//   left: 0;
+//   height: 100%;
+//   width: 100%;
+//   background-image: radial-gradient(
+//     70% 40% at 50% 70%,
+//     theme.$dark-clr-trans,
+//     theme.$dark-clr-trans 50%,
+//     transparent 50%
+//   );
+//   z-index: -1;
+// }
+
+.jumpReference {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  bottom: 0;
+  left: 0;
+  animation: jump 0.2s;
+}
+
+@keyframes jump {
+  0%,
+  100% {
+    bottom: 0;
+  }
+
+  50% {
+    bottom: 3vmin;
+  }
+}

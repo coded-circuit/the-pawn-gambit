@@ -5,7 +5,8 @@ import GameUI from "./GameUI";
 import styles from "./Game.module.scss";
 import GridCell from "./GridCell";
 import { movePlayer, selectPlayerPosition } from "../../data/gameSlice";
-import { getVectorSum, isValidCell } from "../../global/utils";
+import { getVectorSum, isValidCell, PieceType } from "../../global/utils";
+import Piece from "./Piece";
 
 // Initialize the grid cells
 const gridCells = new Array(8).fill(null).map(() => new Array(8).fill(null));
@@ -21,17 +22,6 @@ const Game = () => {
   // TEST
   const playerPosition = useSelector(selectPlayerPosition);
   const input = useInputs();
-
-  // TEST
-  const gfxPlayerStyles = {
-    backgroundColor: "black",
-    position: "absolute",
-    width: "10vw",
-    height: "10vh",
-    left: "calc(65vmin + " + playerPosition.x * 3 + "rem)",
-    top: playerPosition.y * 3 + "rem",
-    transition: "all 0.2s",
-  };
 
   // Handle Input
   useEffect(() => {
@@ -79,8 +69,10 @@ const Game = () => {
       <div className={styles.graphicsGridBorder}></div>
       <div className={styles.graphicsGridTrunk}></div>
       <div className={styles.gridContainer}>{gridCells}</div>
-      {/* TEST */}
-      <div style={gfxPlayerStyles}></div>
+      <div className={styles.piecesContainer}>
+        {/* TEST */}
+        <Piece gridPos={playerPosition} type={PieceType.KNIGHT} />
+      </div>
     </main>
   );
 };
