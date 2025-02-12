@@ -46,6 +46,8 @@ const gameSlice = createSlice({
     movePlayer: {
       reducer(state, action) {
         const { x, y } = action.payload;
+        if (x === 0 && y === 0) return state;
+
         const currPosition = state.player.position;
         const newPosition = getVectorSum(currPosition, { x, y });
         verifyPlayerMovement(currPosition, newPosition);
@@ -108,8 +110,8 @@ const gameSlice = createSlice({
           const piecePos = state.pieces[pieceId].position;
           const newPosition = state.movingPieces[pieceId];
           if (
-            newPosition.x !== currPlayerPos.x &&
-            newPosition.y !== currPlayerPos.y
+            !(newPosition.x === currPlayerPos.x &&
+            newPosition.y === currPlayerPos.y)
           ) {
             console.log("piecePos:", piecePos);
             console.log("newPosition:", newPosition);
@@ -117,7 +119,11 @@ const gameSlice = createSlice({
             state.pieces[pieceId].position.x = newPosition.x;
             state.pieces[pieceId].position.y = newPosition.y;
           } else {
-            console.log("A piece was blocked by the player!");
+            console.log(
+              "A piece was blocked by the player!",
+              pieceId,
+              state.pieces[pieceId].type
+            );
           }
         });
 

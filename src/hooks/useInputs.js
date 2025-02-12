@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-
+const inputKeys = ["w", "a", "s", "d", " "];
 const useInputs = () => {
   const [input, setInput] = useState();
   const prevInput = useRef("");
   const handleKeyDown = useCallback((e) => {
-    if (["w", "a", "s", "d"].includes(e.key)) {
+    if (inputKeys.includes(e.key)) {
       if (e.key === prevInput.current) return;
 
       setInput(e.key);
@@ -12,7 +12,7 @@ const useInputs = () => {
     }
   }, []);
   const handleKeyUp = useCallback((e) => {
-    if (["w", "a", "s", "d"].includes(e.key)) {
+    if (inputKeys.includes(e.key)) {
       if (e.key === prevInput.current) {
         prevInput.current = "";
         setInput("");

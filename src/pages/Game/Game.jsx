@@ -68,7 +68,7 @@ const Game = () => {
   useEffect(() => {
     // TODO: stop input for a few seconds when starting game
     if (input === "" || input === undefined || processing.current) return;
-    // console.log("INPUT:", input);
+    console.log("INPUT:", `"${input}"`);
 
     let direction = { x: 0, y: 0 };
     switch (input) {
@@ -84,13 +84,22 @@ const Game = () => {
       case "d":
         direction.x = 1;
         break;
+      case " ":
+        break;
+      default:
+        direction = null;
     }
-    if (direction.x === 0 && direction.y === 0) {
+    if (direction === null) {
       return;
     }
 
     const movingTo = getVectorSum(playerPosition, direction);
-    if (occupiedCellsMatrix[movingTo.y][movingTo.x]) return; // TODO: Add attack logic
+    if (!(playerPosition.x === movingTo.x && playerPosition.y === movingTo.y)) {
+      if (occupiedCellsMatrix[movingTo.y][movingTo.x]) {
+        return; // TODO: Add attack logic
+      }
+      // 0, 1
+    }
     if (isValidCell(movingTo)) {
       (async () => {
         processing.current = true;
