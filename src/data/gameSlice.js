@@ -11,6 +11,7 @@ import {
   PieceMovementFunc,
 } from "../global/utils";
 
+export const playerCaptureCooldown = 10;
 const playerSpawnPos = { x: 3, y: 4 };
 const initialState = {
   // pieceId: { position, type, cooldown }
@@ -19,7 +20,7 @@ const initialState = {
   player: {
     position: { ...playerSpawnPos },
     type: PieceType.PLAYER,
-    cooldown: null,
+    captureCooldownLeft: playerCaptureCooldown,
   },
 
   // pieceId: { x, y }
@@ -28,10 +29,11 @@ const initialState = {
   // []{ x, y }, Can have duplicates
   captureCells: [],
 
-  // 2d boolean matrix
+  // 2d matrix, either false or a pieceId
   occupiedCellsMatrix: new Array(8).fill().map(() => new Array(8).fill(false)),
 };
-initialState.occupiedCellsMatrix[playerSpawnPos.y][playerSpawnPos.x] = true;
+initialState.occupiedCellsMatrix[playerSpawnPos.y][playerSpawnPos.x] =
+  "ThePlayer";
 
 const gameSlice = createSlice({
   name: "game",
@@ -45,18 +47,35 @@ const gameSlice = createSlice({
 
     movePlayer: {
       reducer(state, action) {
-        const { x, y } = action.payload;
+        const { x, y, isCapturing } = action.payload;
+        if (state.player.captureCooldownLeft > 0) {
+          state.player.captureCooldownLeft -= 1;
+        }
         if (x === 0 && y === 0) return state;
 
         const currPosition = state.player.position;
         const newPosition = getVectorSum(currPosition, { x, y });
+
+        if (isCapturing) {
+          assert(
+            state.occupiedCellsMatrix[newPosition.y][newPosition.x] !== false,
+            "Player trying to capture an unoccupied cell!"
+          );
+          const capturedPieceId =
+            state.occupiedCellsMatrix[newPosition.y][newPosition.x];
+          state.occupiedCellsMatrix[newPosition.y][newPosition.x] = false;
+          delete state.pieces[capturedPieceId];
+          delete state.movingPieces[capturedPieceId];
+          state.player.captureCooldownLeft = playerCaptureCooldown;
+        }
+
         verifyPlayerMovement(currPosition, newPosition);
-        moveOccupiedCell(state, currPosition, newPosition);
+        moveOccupiedCell(state, currPosition, newPosition, "ThePlayer");
         state.player.position.x = newPosition.x;
         state.player.position.y = newPosition.y;
       },
-      prepare(x, y) {
-        return { payload: { x, y } };
+      prepare(x, y, isCapturing) {
+        return { payload: { x, y, isCapturing } };
       },
     },
 
@@ -64,7 +83,7 @@ const gameSlice = createSlice({
       reducer(state, action) {
         const { x, y, type } = action.payload;
         assert(
-          !state.occupiedCellsMatrix[y][x],
+          state.occupiedCellsMatrix[y][x] === false,
           "Trying to add a piece to an occupied cell"
         );
         assert(type !== PieceType.PLAYER, "Trying to add a new player!");
@@ -76,7 +95,7 @@ const gameSlice = createSlice({
           cooldown: PieceCooldown[type],
         };
         state.pieces[pieceId] = newPiece;
-        state.occupiedCellsMatrix[y][x] = true;
+        state.occupiedCellsMatrix[y][x] = pieceId;
         console.log("ADDED NEW PIECE!", pieceId, newPiece);
       },
       prepare(x, y, type) {
@@ -110,12 +129,14 @@ const gameSlice = createSlice({
           const piecePos = state.pieces[pieceId].position;
           const newPosition = state.movingPieces[pieceId];
           if (
-            !(newPosition.x === currPlayerPos.x &&
-            newPosition.y === currPlayerPos.y)
+            !(
+              newPosition.x === currPlayerPos.x &&
+              newPosition.y === currPlayerPos.y
+            )
           ) {
             console.log("piecePos:", piecePos);
             console.log("newPosition:", newPosition);
-            moveOccupiedCell(state, piecePos, newPosition);
+            moveOccupiedCell(state, piecePos, newPosition, pieceId);
             state.pieces[pieceId].position.x = newPosition.x;
             state.pieces[pieceId].position.y = newPosition.y;
           } else {
@@ -209,6 +230,8 @@ export const selectOccupiedCellsMatrix = (state) =>
   state.game.occupiedCellsMatrix;
 export const selectCaptureCells = (state) => state.game.captureCells;
 export const selectPlayerPosition = (state) => state.game.player.position;
+export const selectPlayerCaptureCooldown = (state) =>
+  state.game.player.captureCooldownLeft;
 
 // ACTION EXPORTS --------------------------------------
 export const { resetState, movePlayer, addPiece, processPieces } =
@@ -223,7 +246,7 @@ function verifyPlayerMovement(v1, v2) {
   assert(dist === 1, `Invalid player movement! (${dist})`);
 }
 
-function moveOccupiedCell(state, v1, v2) {
+function moveOccupiedCell(state, v1, v2, pieceId) {
   console.log("MOVING:", v1, v2);
   assertIsVector(v1);
   assertIsVector(v2);
@@ -232,20 +255,23 @@ function moveOccupiedCell(state, v1, v2) {
     return;
   }
 
-  assert(state.occupiedCellsMatrix[v1.y][v1.x], "Moving a non-occupied cell!");
+  assert(
+    state.occupiedCellsMatrix[v1.y][v1.x] !== false,
+    "Moving a non-occupied cell!"
+  );
   state.occupiedCellsMatrix[v1.y][v1.x] = false;
   assert(
     state.occupiedCellsMatrix[v1.y][v1.x] === false,
     "Moving to an occupied cell!"
   );
-  state.occupiedCellsMatrix[v2.y][v2.x] = true;
+  state.occupiedCellsMatrix[v2.y][v2.x] = pieceId;
 }
 
 function extractOccupiedCells(matrix) {
   const output = [];
   for (let y = 0; y < 8; y++) {
     for (let x = 0; x < 8; x++) {
-      if (matrix[y][x]) {
+      if (matrix[y][x] !== false) {
         output.push({ x, y });
       }
     }

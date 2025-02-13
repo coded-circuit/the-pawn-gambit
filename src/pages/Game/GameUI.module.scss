@@ -7,6 +7,7 @@
 
 .upperLeft,
 .upperRight,
+.upperCenter,
 .lowerLeft {
   width: auto;
   position: absolute;
@@ -28,6 +29,42 @@
       font-size: 1.5rem;
       display: block;
       margin-bottom: -0.8rem;
+    }
+  }
+}
+
+.upperCenter {
+  $width: 60vmin;
+
+  left: calc((100vw - $width) / 2);
+  top: calc(50vh - 45vmin);
+  width: $width;
+  height: 5vmin;
+  padding: 0;
+
+  div.cooldownBar {
+    background-color: theme.$acc-clr-1;
+    width: 100%;
+    height: 100%;
+    border-radius: 3vmin;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    div.cooldownBarBG {
+      background-color: theme.$cell-clr-1;
+      border-radius: 2vmin;
+      width: 95%;
+      height: 50%;
+      overflow: hidden;
+
+      div.cooldownBarFill {
+        background-color: theme.$acc-clr-3;
+        height: 100%;
+        transition: width 0.5s;
+      }
     }
   }
 }

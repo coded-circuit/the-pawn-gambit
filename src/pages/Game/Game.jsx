@@ -13,6 +13,7 @@ import {
   selectAllPieces,
   selectOccupiedCellsMatrix,
   selectCaptureCells,
+  selectPlayerCaptureCooldown,
 } from "../../data/gameSlice";
 import {
   getVectorSum,
@@ -39,9 +40,10 @@ const Game = () => {
   const pieces = useSelector(selectAllPieces);
   const occupiedCellsMatrix = useSelector(selectOccupiedCellsMatrix);
   const captureCells = useSelector(selectCaptureCells);
+  const playerPosition = useSelector(selectPlayerPosition);
+  const playerCooldown = useSelector(selectPlayerCaptureCooldown);
 
   // TEST
-  const playerPosition = useSelector(selectPlayerPosition);
 
   // DEBUG
   // useEffect(() => {
@@ -94,23 +96,28 @@ const Game = () => {
     }
 
     const movingTo = getVectorSum(playerPosition, direction);
+    if (!isValidCell(movingTo)) return;
+
+    let isCapturing = false;
     if (!(playerPosition.x === movingTo.x && playerPosition.y === movingTo.y)) {
-      if (occupiedCellsMatrix[movingTo.y][movingTo.x]) {
-        return; // TODO: Add attack logic
+      if (occupiedCellsMatrix[movingTo.y][movingTo.x] !== false) {
+        if (playerCooldown <= 0) {
+          isCapturing = true;
+        } else {
+          return; // TODO: Add attack logic
+        }
       }
-      // 0, 1
     }
-    if (isValidCell(movingTo)) {
-      (async () => {
-        processing.current = true;
-        dispatch(movePlayer(direction.x, direction.y));
-        await sleep(100);
-        console.log("Processing pieces");
-        dispatch(processPieces());
-        await sleep(250);
-        processing.current = false;
-      })();
-    }
+
+    (async () => {
+      processing.current = true;
+      dispatch(movePlayer(direction.x, direction.y, isCapturing));
+      await sleep(100);
+      console.log("Processing pieces");
+      dispatch(processPieces());
+      await sleep(250);
+      processing.current = false;
+    })();
   }, [input]);
 
   let pieceElements;

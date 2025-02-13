@@ -1,3 +1,4 @@
+$grid-top-offset: 50vh;
 $grid-border-outer-radius: 4vmin;
 $grid-border-inner-radius: 2vmin;
 $grid-border-thickness: 3vmin;
@@ -7,7 +8,7 @@ $grid-border-thickness: 3vmin;
   width: calc(theme.$grid-scale + $grid-border-thickness * 2);
   height: calc(theme.$grid-scale + $grid-border-thickness * 2);
   position: absolute;
-  top: calc(45vh - theme.$grid-scale / 2 - $grid-border-thickness);
+  top: calc($grid-top-offset - theme.$grid-scale / 2 - $grid-border-thickness);
   left: calc(50vw - theme.$grid-scale / 2 - $grid-border-thickness);
   border-radius: $grid-border-outer-radius;
 
@@ -39,7 +40,7 @@ $grid-border-thickness: 3vmin;
   width: calc(theme.$grid-scale);
   height: calc(theme.$grid-scale);
   position: absolute;
-  top: calc(45vh - theme.$grid-scale / 2);
+  top: calc($grid-top-offset - theme.$grid-scale / 2);
   left: calc(50vw - theme.$grid-scale / 2);
 
   &.gridContainer {
