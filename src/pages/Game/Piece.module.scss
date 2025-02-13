@@ -6,7 +6,8 @@
 }
 
 .jumpReference,
-.danceReference {
+.danceReference,
+.jiggleReference {
   width: 100%;
   height: 100%;
   position: relative;
@@ -17,6 +18,11 @@
 .danceReference {
   transform-origin: 50% 80%;
   animation: dance 1s infinite;
+}
+
+.jiggleReference {
+  transform-origin: 50% 80%;
+  animation: jiggle 0.4s infinite;
 }
 
 .jumping {
@@ -44,5 +50,18 @@
   50%,
   75% {
     transform: scaleY(0.95) scaleX(1.05);
+  }
+}
+
+@keyframes jiggle {
+  0%,
+  25%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  50%,
+  75% {
+    transform: scaleY(0.9) scaleX(1.1);
   }
 }

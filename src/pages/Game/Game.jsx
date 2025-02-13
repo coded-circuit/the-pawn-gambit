@@ -150,6 +150,7 @@ const Game = () => {
           key={pieceId}
           gridPos={pieces[pieceId].position}
           type={pieces[pieceId].type}
+          willMove={pieces[pieceId].cooldown === 0}
         />
       );
     });
