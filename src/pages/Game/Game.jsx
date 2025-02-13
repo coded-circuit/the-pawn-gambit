@@ -20,12 +20,15 @@ import {
 } from "../../data/gameSlice";
 import {
   assert,
+  Difficulty,
+  getPieceWithPos,
   getVectorSum,
   isValidCell,
   PieceType,
   sleep,
 } from "../../global/utils";
 import Piece from "./Piece";
+import store from "../../data/store";
 
 const Game = () => {
   const dispatch = useDispatch();
@@ -42,12 +45,12 @@ const Game = () => {
     (async () => {
       await sleep(600);
       dispatch(resetState());
-      dispatch(addPiece(0, 0, PieceType.PAWN_E));
-      dispatch(addPiece(3, 0, PieceType.PAWN_S));
-      dispatch(addPiece(1, 1, PieceType.KNIGHT));
-      dispatch(addPiece(1, 4, PieceType.QUEEN));
-      dispatch(addPiece(6, 7, PieceType.ROOK));
-      dispatch(addPiece(7, 7, PieceType.BISHOP));
+      // dispatch(addPiece(0, 0, PieceType.PAWN_E));
+      // dispatch(addPiece(3, 0, PieceType.PAWN_S));
+      // dispatch(addPiece(1, 1, PieceType.KNIGHT));
+      // dispatch(addPiece(1, 4, PieceType.QUEEN));
+      // dispatch(addPiece(6, 7, PieceType.ROOK));
+      // dispatch(addPiece(7, 7, PieceType.BISHOP));
     })();
   }, []);
 
@@ -144,6 +147,25 @@ const Game = () => {
       // console.log("Processing pieces");
       dispatch(processPieces());
       await sleep(250);
+      if (Math.random() < 1) {
+        await sleep(250);
+        // for (let i = 0; i < 3; i++) {
+        const { type, pos } = getPieceWithPos(Difficulty.EASY);
+        console.log(
+          "Cell before adding piece:",
+          occupiedCellsMatrix[pos.y][pos.x]
+        );
+        // Get directly from store to have updated cell matrix
+        if (store.getState().game.occupiedCellsMatrix[pos.y][pos.x] === false) {
+          dispatch(addPiece(pos.x, pos.y, type));
+          console.log("Piece spawned!", pos);
+          await sleep(500);
+        } else {
+          console.log("Piece spawn was blocked!", pos);
+        }
+        // }
+        console.log("----------------------------");
+      }
       setIsProcessingInput(false);
     })();
   }, [currentInput]);
@@ -167,19 +189,30 @@ const Game = () => {
     const output = new Array(8).fill(null).map(() => new Array(8).fill(null));
     for (let y = 0; y < 8; y++) {
       for (let x = 0; x < 8; x++) {
+        const DEBUG_OCCUPIED = occupiedCellsMatrix[y][x] !== false;
         output[y][x] = (
-          <GridCell key={x + y * 8} pos={{ x, y }} isCapture={false} />
+          <GridCell
+            key={x + y * 8}
+            pos={{ x, y }}
+            isCapture={false}
+            debug={{ occupied: DEBUG_OCCUPIED }}
+          />
         );
       }
     }
     captureCells.forEach((cell) => {
       const { x, y } = cell;
       output[y][x] = (
-        <GridCell key={x + y * 8} pos={{ x, y }} isCapture={true} />
+        <GridCell
+          key={x + y * 8}
+          pos={{ x, y }}
+          isCapture={true}
+          debug={{ occupied: false }}
+        />
       );
     });
     return output;
-  }, [captureCells]);
+  }, [captureCells, occupiedCellsMatrix]);
 
   return (
     <main>

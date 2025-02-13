@@ -100,7 +100,7 @@ const gameSlice = createSlice({
         const { x, y, type } = action.payload;
         assert(
           state.occupiedCellsMatrix[y][x] === false,
-          "Trying to add a piece to an occupied cell"
+          `Trying to add a piece to an occupied cell (${x}, ${y})`
         );
         assert(type !== PieceType.PLAYER, "Trying to add a new player!");
 

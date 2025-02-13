@@ -165,6 +165,66 @@ export function arrayHasVector(array, vector) {
     undefined
   );
 }
+const edgeToPawns = [
+  PieceType.PAWN_S,
+  PieceType.PAWN_W,
+  PieceType.PAWN_E,
+  PieceType.PAWN_N,
+];
+export function getPieceWithPos(difficulty) {
+  const { edge, randomPoint: pos } = pickSpawnPoint();
+  const type = choosePieceToSpawn(difficulty);
+  assertIsValidNonPlayerPiece(type);
+  assertIsVector(pos);
+
+  if (edgeToPawns.includes(type)) {
+    assertIsValidNonPlayerPiece(edgeToPawns[edge]);
+    return { type: edgeToPawns[edge], pos };
+  }
+  return { type, pos };
+}
+
+function pickSpawnPoint() {
+  const getRandomLane = () => Math.floor(Math.random() * 8);
+
+  const edge = Math.floor(Math.random() * 4);
+  let randomPoint = {};
+  switch (edge) {
+    case 0:
+      randomPoint = { x: getRandomLane(), y: 0 };
+      break;
+    case 1:
+      randomPoint = { x: 7, y: getRandomLane() };
+      break;
+    case 2:
+      randomPoint = { x: 0, y: getRandomLane() };
+      break;
+    case 3:
+      randomPoint = { x: getRandomLane(), y: 7 };
+      break;
+    default:
+      assert(false, "Invalid edge!");
+  }
+  assert(isValidCell(randomPoint), "Invalid spawn point chosen!");
+  return { edge, randomPoint };
+}
+
+function choosePieceToSpawn(difficulty) {
+  const probabilities = pieceProbabilities[difficulty];
+  const rand = Math.random();
+  let cumulativeProb = 0;
+  for (let i = 0; i < probabilities.length; i++) {
+    const prob = probabilities[i];
+    if (prob == null) continue;
+
+    cumulativeProb += prob;
+    if (rand < cumulativeProb) {
+      return i;
+    }
+  }
+  return probabilities.length - 1;
+}
+
 // ------------------------------------ DEBUGGING UTILITIES ------------------------------------
 export function assert(condition, message) {
   if (!condition) {
@@ -179,12 +239,19 @@ export function assertIsVector(vector) {
   );
 }
 
+export function assertIsValidNonPlayerPiece(pieceType) {
+  assert(
+    pieceType > 0 && pieceType < Object.keys(PieceType).length,
+    `Non-player piece type assertion failed: ${pieceType}`
+  );
+}
+
 // ------------------------------------ TIMING UTILITIES ------------------------------------
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// ------------------------------------ SCORE UTILITIES ------------------------------------
+// ------------------------------------ SCORE/DIFFICULTY UTILITIES ------------------------------------
 const survivalTurnMilestones = {
   0: 50, // 0-49
   50: 100,
@@ -208,6 +275,23 @@ const pieceCaptureReward = {
   [PieceType.PAWN_E]: 300,
   [PieceType.PAWN_W]: 300,
   [PieceType.PAWN_S]: 300,
+};
+
+const pieceProbabilities = {
+  // [P, Q, R, B, K, PN, PE, PW, PS]
+  [Difficulty.EASY]: [null, 0.03, 0.07, 0.1, 0.2, 0.15, 0.15, 0.15, 0.15],
+  [Difficulty.NORMAL]: [null, 0.08, 0.12, 0.15, 0.25, 0.1, 0.1, 0.1, 0.1],
+  [Difficulty.HARD]: [
+    null,
+    0.15,
+    0.15,
+    0.2,
+    0.25,
+    0.0625,
+    0.0625,
+    0.0625,
+    0.0625,
+  ],
 };
 Object.freeze(survivalTurnMilestones);
 Object.freeze(difficultyMultiplier);
