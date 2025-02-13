@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import useInputs from "../../hooks/useInputs";
 import GameUI from "./GameUI";
@@ -22,7 +22,6 @@ import {
   sleep,
 } from "../../global/utils";
 import Piece from "./Piece";
-import { nanoid } from "@reduxjs/toolkit";
 
 // Initialize the grid cells
 // const gridCells = new Array(8).fill(null).map(() => new Array(8).fill(null));
@@ -55,14 +54,11 @@ const Game = () => {
     (async () => {
       await sleep(600);
       dispatch(resetState());
-      dispatch(addPiece(0, 0, PieceType.PAWN_E));
+      // dispatch(addPiece(0, 0, PieceType.PAWN_E));
       dispatch(addPiece(3, 0, PieceType.PAWN_S));
-      dispatch(addPiece(1, 1, PieceType.KNIGHT));
-      dispatch(addPiece(1, 4, PieceType.QUEEN));
+      // dispatch(addPiece(1, 1, PieceType.KNIGHT));
+      // dispatch(addPiece(1, 4, PieceType.QUEEN));
       dispatch(addPiece(6, 7, PieceType.ROOK));
-      // dispatch(addPiece(3, 1, PieceType.QUEEN));
-      // dispatch(addPiece(7, 6, PieceType.ROOK));
-      // dispatch(addPiece(0, 5, PieceType.PAWN_E));
     })();
   }, []);
 
@@ -121,9 +117,7 @@ const Game = () => {
   }, [input]);
 
   let pieceElements;
-  console.log("Something updated!");
   pieceElements = Object.keys(pieces).map((pieceId) => {
-    // console.log("Looping over pieces, piece:", pieces[pieceId]);
     return (
       <Piece
         key={pieceId}
@@ -133,20 +127,23 @@ const Game = () => {
     );
   });
 
-  const gridCells = new Array(8).fill(null).map(() => new Array(8).fill(null));
-  for (let y = 0; y < 8; y++) {
-    for (let x = 0; x < 8; x++) {
-      gridCells[y][x] = (
-        <GridCell key={x + y * 8} pos={{ x, y }} isCapture={false} />
-      );
+  const gridCells = useMemo(() => {
+    const output = new Array(8).fill(null).map(() => new Array(8).fill(null));
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        output[y][x] = (
+          <GridCell key={x + y * 8} pos={{ x, y }} isCapture={false} />
+        );
+      }
     }
-  }
-  captureCells.forEach((cell) => {
-    const { x, y } = cell;
-    gridCells[y][x] = (
-      <GridCell key={x + y * 8} pos={{ x, y }} isCapture={true} />
-    );
-  });
+    captureCells.forEach((cell) => {
+      const { x, y } = cell;
+      gridCells[y][x] = (
+        <GridCell key={x + y * 8} pos={{ x, y }} isCapture={true} />
+      );
+    });
+    return output;
+  }, []);
 
   return (
     <main>
@@ -158,7 +155,6 @@ const Game = () => {
         {/* TEST */}
         <Piece gridPos={playerPosition} type={PieceType.PLAYER} />
         {pieceElements}
-        {/* <Piece gridPos={knightPosition.current} type={PieceType.KNIGHT} /> */}
       </div>
     </main>
   );

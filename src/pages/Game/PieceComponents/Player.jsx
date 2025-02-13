@@ -31,8 +31,8 @@ const Player = () => {
           y2="0"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#212121" />
-          <stop offset="0.517671" stop-color="#555555" />
+          <stop stopColor="#212121" />
+          <stop offset="0.517671" stopColor="#555555" />
         </linearGradient>
         <linearGradient
           id="paint1_linear_40_3"
@@ -42,8 +42,8 @@ const Player = () => {
           y2="0"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#212121" />
-          <stop offset="0.517671" stop-color="#555555" />
+          <stop stopColor="#212121" />
+          <stop offset="0.517671" stopColor="#555555" />
         </linearGradient>
         <linearGradient
           id="paint2_linear_40_3"
@@ -53,8 +53,8 @@ const Player = () => {
           y2="0"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#212121" />
-          <stop offset="0.517671" stop-color="#555555" />
+          <stop stopColor="#212121" />
+          <stop offset="0.517671" stopColor="#555555" />
         </linearGradient>
       </defs>
     </svg>

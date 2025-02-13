@@ -18,13 +18,13 @@ const GridCellWarning = ({ show }) => {
       <path
         d="M38 14.5833C38 34.5833 38 43.75 38 43.75"
         stroke="#EAB5A1"
-        stroke-width="9"
+        strokeWidth="9"
         stroke-linecap="round"
       />
       <path
         d="M38 61.25L38 57.0833"
         stroke="#EAB5A1"
-        stroke-width="9"
+        strokeWidth="9"
         stroke-linecap="round"
       />
     </svg>

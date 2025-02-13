@@ -16,7 +16,7 @@ const Shadow = ({ isMoving }) => {
         rx="45"
         ry="25"
         fill="#3D3D3D"
-        fill-opacity="0.3"
+        fillOpacity="0.3"
       />
     </svg>
   );
