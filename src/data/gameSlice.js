@@ -96,7 +96,7 @@ const gameSlice = createSlice({
         };
         state.pieces[pieceId] = newPiece;
         state.occupiedCellsMatrix[y][x] = pieceId;
-        console.log("ADDED NEW PIECE!", pieceId, newPiece);
+        // console.log("ADDED NEW PIECE!", pieceId, newPiece);
       },
       prepare(x, y, type) {
         // TODO: ID input might be replaced
@@ -125,7 +125,7 @@ const gameSlice = createSlice({
 
         // loop over all moving pieces and move them
         Object.keys(state.movingPieces).forEach((pieceId) => {
-          console.log("MOVING PIECE:", pieceId);
+          // console.log("MOVING PIECE:", pieceId);
           const piecePos = state.pieces[pieceId].position;
           const newPosition = state.movingPieces[pieceId];
           if (
@@ -134,17 +134,17 @@ const gameSlice = createSlice({
               newPosition.y === currPlayerPos.y
             )
           ) {
-            console.log("piecePos:", piecePos);
-            console.log("newPosition:", newPosition);
+            // console.log("piecePos:", piecePos);
+            // console.log("newPosition:", newPosition);
             moveOccupiedCell(state, piecePos, newPosition, pieceId);
             state.pieces[pieceId].position.x = newPosition.x;
             state.pieces[pieceId].position.y = newPosition.y;
           } else {
-            console.log(
-              "A piece was blocked by the player!",
-              pieceId,
-              state.pieces[pieceId].type
-            );
+            // console.log(
+            //   "A piece was blocked by the player!",
+            //   pieceId,
+            //   state.pieces[pieceId].type
+            // );
           }
         });
 
@@ -154,7 +154,7 @@ const gameSlice = createSlice({
         );
         const nextTurnMoves = [];
         Object.keys(state.pieces).forEach((pieceId) => {
-          console.log("UPDATING PIECE:", pieceId);
+          // console.log("UPDATING PIECE:", pieceId);
           const piece = state.pieces[pieceId];
 
           // If cooldown is currently zero, reset and remove from moving pieces
@@ -169,7 +169,7 @@ const gameSlice = createSlice({
             // TODO: optimization for non-pawns to add capture cells here
             // If cooldown is now zero, set for movement
             if (piece.cooldown === 0) {
-              console.log("PIECE WILL BE MOVING:", pieceId, { ...piece });
+              // console.log("PIECE WILL BE MOVING:", pieceId, { ...piece });
               const moveCells = PieceMovementFunc[piece.type](
                 piece.position,
                 currPlayerPos,
@@ -247,11 +247,10 @@ function verifyPlayerMovement(v1, v2) {
 }
 
 function moveOccupiedCell(state, v1, v2, pieceId) {
-  console.log("MOVING:", v1, v2);
+  // console.log("MOVING:", v1, v2);
   assertIsVector(v1);
   assertIsVector(v2);
   if (v1.x === v2.x && v1.y === v2.y) {
-    console.log("Moving to the same cell", v1, v2);
     return;
   }
 

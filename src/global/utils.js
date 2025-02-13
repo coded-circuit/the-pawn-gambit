@@ -64,7 +64,6 @@ export const PieceMovementFunc = {
     );
   },
   [PieceType.KNIGHT]: (pos, playerPos, occupied) => {
-    console.log("KNIGHT MOVES!");
     return getMoveCellsByOffset(pos, playerPos, occupied, [
       { x: 1, y: 2 },
       { x: 2, y: 1 },
@@ -223,6 +222,3 @@ function removeVectorInArray(array, vector) {
     return item.x !== vector.x || item.y !== vector.y;
   });
 }
-console.log(
-  PieceMovementFunc[PieceType.KNIGHT]({ x: 1, y: 0 }, { x: 5, y: 5 }, [])
-);

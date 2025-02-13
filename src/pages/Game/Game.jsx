@@ -54,11 +54,12 @@ const Game = () => {
     (async () => {
       await sleep(600);
       dispatch(resetState());
-      // dispatch(addPiece(0, 0, PieceType.PAWN_E));
+      dispatch(addPiece(0, 0, PieceType.PAWN_E));
       dispatch(addPiece(3, 0, PieceType.PAWN_S));
-      // dispatch(addPiece(1, 1, PieceType.KNIGHT));
-      // dispatch(addPiece(1, 4, PieceType.QUEEN));
+      dispatch(addPiece(1, 1, PieceType.KNIGHT));
+      dispatch(addPiece(1, 4, PieceType.QUEEN));
       dispatch(addPiece(6, 7, PieceType.ROOK));
+      dispatch(addPiece(7, 7, PieceType.BISHOP));
     })();
   }, []);
 
@@ -66,7 +67,7 @@ const Game = () => {
   useEffect(() => {
     // TODO: stop input for a few seconds when starting game
     if (input === "" || input === undefined || processing.current) return;
-    console.log("INPUT:", `"${input}"`);
+    // console.log("INPUT:", `"${input}"`);
 
     let direction = { x: 0, y: 0 };
     switch (input) {
@@ -109,7 +110,7 @@ const Game = () => {
       processing.current = true;
       dispatch(movePlayer(direction.x, direction.y, isCapturing));
       await sleep(100);
-      console.log("Processing pieces");
+      // console.log("Processing pieces");
       dispatch(processPieces());
       await sleep(250);
       processing.current = false;
@@ -138,12 +139,12 @@ const Game = () => {
     }
     captureCells.forEach((cell) => {
       const { x, y } = cell;
-      gridCells[y][x] = (
+      output[y][x] = (
         <GridCell key={x + y * 8} pos={{ x, y }} isCapture={true} />
       );
     });
     return output;
-  }, []);
+  }, [captureCells]);
 
   return (
     <main>
