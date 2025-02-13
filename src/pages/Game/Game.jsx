@@ -143,15 +143,17 @@ const Game = () => {
     })();
   }, [currentInput]);
 
-  const pieceComponents = Object.keys(pieces).map((pieceId) => {
-    return (
-      <Piece
-        key={pieceId}
-        gridPos={pieces[pieceId].position}
-        type={pieces[pieceId].type}
-      />
-    );
-  });
+  const pieceComponents = useMemo(() => {
+    return Object.keys(pieces).map((pieceId) => {
+      return (
+        <Piece
+          key={pieceId}
+          gridPos={pieces[pieceId].position}
+          type={pieces[pieceId].type}
+        />
+      );
+    });
+  }, [pieces]);
 
   const gridCellComponents = useMemo(() => {
     const output = new Array(8).fill(null).map(() => new Array(8).fill(null));
