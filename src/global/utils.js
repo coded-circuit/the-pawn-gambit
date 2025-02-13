@@ -1,4 +1,5 @@
-import { useSelector } from "react-redux";
+// ------------------------------------ CONSTANTS AND ENUMS ------------------------------------
+export const TRANSITION_HALF_LIFE = 750;
 
 export const PieceType = {
   PLAYER: 0,
@@ -11,7 +12,6 @@ export const PieceType = {
   PAWN_W: 7,
   PAWN_S: 8,
 };
-
 export const PieceCooldown = {
   [PieceType.PLAYER]: null,
   [PieceType.QUEEN]: 5,
@@ -23,14 +23,12 @@ export const PieceCooldown = {
   [PieceType.PAWN_W]: 2,
   [PieceType.PAWN_S]: 2,
 };
-
 export const PageName = {
   MAIN_MENU: 0,
   GAME: 1,
   OPTIONS: 2,
   CREDITS: 3,
 };
-
 export const PieceMovementFunc = {
   [PieceType.PLAYER]: (pos, playerPos, occupied) => {
     assert(false, "Player does not have a movement function");
@@ -119,14 +117,18 @@ export const PieceCaptureFunc = {
     ]);
   },
 };
-
-export const TRANSITION_HALF_LIFE = 750;
+export const Difficulty = {
+  EASY: 0,
+  NORMAL: 1,
+  HARD: 2,
+};
 
 Object.freeze(PieceType);
 Object.freeze(PieceCooldown);
 Object.freeze(PageName);
 Object.freeze(PieceMovementFunc);
 Object.freeze(PieceCaptureFunc);
+Object.freeze(Difficulty);
 
 // ------------------------------------ MATH UTILITIES ------------------------------------
 export function getDistance(v1, v2) {
@@ -156,6 +158,13 @@ export function isValidCell(vector) {
   return vector.x >= 0 && vector.x < 8 && vector.y >= 0 && vector.y < 8;
 }
 
+export function arrayHasVector(array, vector) {
+  assertIsVector(vector);
+  return (
+    array.find((item) => item.x === vector.x && item.y === vector.y) !==
+    undefined
+  );
+}
 // ------------------------------------ DEBUGGING UTILITIES ------------------------------------
 export function assert(condition, message) {
   if (!condition) {
@@ -170,8 +179,58 @@ export function assertIsVector(vector) {
   );
 }
 
+// ------------------------------------ TIMING UTILITIES ------------------------------------
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// ------------------------------------ SCORE UTILITIES ------------------------------------
+const survivalTurnMilestones = {
+  0: 50, // 0-49
+  50: 100,
+  100: 200,
+  200: 300,
+  300: 500,
+};
+const difficultyMultiplier = {
+  [Difficulty.EASY]: 1.0,
+  [Difficulty.NORMAL]: 1.5,
+  [Difficulty.HARD]: 2.0,
+};
+
+const pieceCaptureReward = {
+  [PieceType.PLAYER]: null,
+  [PieceType.QUEEN]: 2000,
+  [PieceType.ROOK]: 1500,
+  [PieceType.BISHOP]: 800,
+  [PieceType.KNIGHT]: 800,
+  [PieceType.PAWN_N]: 300,
+  [PieceType.PAWN_E]: 300,
+  [PieceType.PAWN_W]: 300,
+  [PieceType.PAWN_S]: 300,
+};
+Object.freeze(survivalTurnMilestones);
+Object.freeze(difficultyMultiplier);
+Object.freeze(pieceCaptureReward);
+
+export function getPassiveScoreIncrease(difficulty, turnNumber) {
+  let prevMilestone = 0;
+  for (let milestone in survivalTurnMilestones) {
+    if (turnNumber > Number(milestone)) {
+      prevMilestone = milestone;
+      continue;
+    }
+    return (
+      survivalTurnMilestones[prevMilestone] * difficultyMultiplier[difficulty]
+    );
+  }
+  return (
+    survivalTurnMilestones[prevMilestone] * difficultyMultiplier[difficulty]
+  );
+}
+
+export function getPieceCaptureScoreIncrease(difficulty, pieceType) {
+  return pieceCaptureReward[pieceType] * difficultyMultiplier[difficulty];
 }
 
 // ------------------------------------ MOVEMENT UTILITIES ------------------------------------
@@ -206,14 +265,6 @@ function getMoveCellsByDirection(piecePos, dirX, dirY, playerPos, obs) {
     currCell.y += dirY;
   }
   return output;
-}
-
-export function arrayHasVector(array, vector) {
-  assertIsVector(vector);
-  return (
-    array.find((item) => item.x === vector.x && item.y === vector.y) !==
-    undefined
-  );
 }
 
 function removeVectorInArray(array, vector) {

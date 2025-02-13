@@ -42,12 +42,12 @@ const Game = () => {
     (async () => {
       await sleep(600);
       dispatch(resetState());
-      // dispatch(addPiece(0, 0, PieceType.PAWN_E));
-      // dispatch(addPiece(3, 0, PieceType.PAWN_S));
-      // dispatch(addPiece(1, 1, PieceType.KNIGHT));
-      // dispatch(addPiece(1, 4, PieceType.QUEEN));
-      // dispatch(addPiece(6, 7, PieceType.ROOK));
-      // dispatch(addPiece(7, 7, PieceType.BISHOP));
+      dispatch(addPiece(0, 0, PieceType.PAWN_E));
+      dispatch(addPiece(3, 0, PieceType.PAWN_S));
+      dispatch(addPiece(1, 1, PieceType.KNIGHT));
+      dispatch(addPiece(1, 4, PieceType.QUEEN));
+      dispatch(addPiece(6, 7, PieceType.ROOK));
+      dispatch(addPiece(7, 7, PieceType.BISHOP));
     })();
   }, []);
 
@@ -187,7 +187,7 @@ const Game = () => {
         turnNumber={turnNumber}
         score={score}
         captureCooldownPercent={
-          (1 - (playerCooldownLeft / playerCaptureCooldown)) * 100
+          (1 - playerCooldownLeft / playerCaptureCooldown) * 100
         }
       />
       <div className={styles.graphicsGridBorder}></div>

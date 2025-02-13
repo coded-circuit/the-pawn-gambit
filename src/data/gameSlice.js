@@ -9,6 +9,9 @@ import {
   PieceCaptureFunc,
   arrayHasVector,
   PieceMovementFunc,
+  getPassiveScoreIncrease,
+  Difficulty,
+  getPieceCaptureScoreIncrease,
 } from "../global/utils";
 
 export const playerCaptureCooldown = 10;
@@ -51,6 +54,10 @@ const gameSlice = createSlice({
     movePlayer: {
       reducer(state, action) {
         state.turnNumber += 1;
+        state.score += getPassiveScoreIncrease(
+          Difficulty.EASY,
+          state.turnNumber
+        );
         const { x, y, isCapturing } = action.payload;
         if (state.player.captureCooldownLeft > 0) {
           state.player.captureCooldownLeft -= 1;
@@ -67,6 +74,11 @@ const gameSlice = createSlice({
           );
           const capturedPieceId =
             state.occupiedCellsMatrix[newPosition.y][newPosition.x];
+
+          state.score += getPieceCaptureScoreIncrease(
+            Difficulty.EASY,
+            state.pieces[capturedPieceId].type
+          );
           state.occupiedCellsMatrix[newPosition.y][newPosition.x] = false;
           delete state.pieces[capturedPieceId];
           delete state.movingPieces[capturedPieceId];
