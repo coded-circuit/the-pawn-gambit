@@ -12,6 +12,12 @@ export const PieceType = {
   PAWN_W: 7,
   PAWN_S: 8,
 };
+export const PawnTypes = [
+  PieceType.PAWN_N,
+  PieceType.PAWN_E,
+  PieceType.PAWN_W,
+  PieceType.PAWN_S,
+];
 export const PieceCooldown = {
   [PieceType.PLAYER]: null,
   [PieceType.QUEEN]: 5,
@@ -124,6 +130,7 @@ export const Difficulty = {
 };
 
 Object.freeze(PieceType);
+Object.freeze(PawnTypes);
 Object.freeze(PieceCooldown);
 Object.freeze(PageName);
 Object.freeze(PieceMovementFunc);

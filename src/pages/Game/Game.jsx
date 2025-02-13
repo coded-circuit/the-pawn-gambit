@@ -75,10 +75,10 @@ const Game = () => {
       inputQueued.current = input;
       return;
     }
-    assert(
-      inputQueued.current === "",
-      "Adding new input when queue isn't empty!"
-    );
+
+    if (inputQueued.current !== "") {
+      inputQueued.current = "";
+    }
     setCurrentInput(input);
     setIsProcessingInput(true);
   }, [input]);
@@ -148,23 +148,17 @@ const Game = () => {
       dispatch(processPieces());
       await sleep(250);
       if (Math.random() < 1) {
-        await sleep(250);
-        // for (let i = 0; i < 3; i++) {
-        const { type, pos } = getPieceWithPos(Difficulty.EASY);
-        console.log(
-          "Cell before adding piece:",
-          occupiedCellsMatrix[pos.y][pos.x]
-        );
-        // Get directly from store to have updated cell matrix
-        if (store.getState().game.occupiedCellsMatrix[pos.y][pos.x] === false) {
-          dispatch(addPiece(pos.x, pos.y, type));
-          console.log("Piece spawned!", pos);
-          await sleep(500);
-        } else {
-          console.log("Piece spawn was blocked!", pos);
+        for (let i = 0; i < 1; i++) {
+          const { type, pos } = getPieceWithPos(Difficulty.EASY);
+          // Get directly from store to have updated cell matrix
+          if (
+            store.getState().game.occupiedCellsMatrix[pos.y][pos.x] === false
+          ) {
+            dispatch(addPiece(pos.x, pos.y, type));
+          }
         }
-        // }
-        console.log("----------------------------");
+        await sleep(200);
+        // console.log("----------------------------");
       }
       setIsProcessingInput(false);
     })();

@@ -12,6 +12,7 @@ import {
   getPassiveScoreIncrease,
   Difficulty,
   getPieceCaptureScoreIncrease,
+  PawnTypes,
 } from "../global/utils";
 
 export const playerCaptureCooldown = 10;
@@ -115,7 +116,6 @@ const gameSlice = createSlice({
         // console.log("ADDED NEW PIECE!", pieceId, newPiece);
       },
       prepare(x, y, type) {
-        // TODO: ID input might be replaced
         return { payload: { x, y, type } };
       },
     },
@@ -124,51 +124,95 @@ const gameSlice = createSlice({
       reducer(state) {
         const currPlayerPos = state.player.position;
 
-        // loop over all moving pieces and check for captures
+        // loop over all moving pieces, check for captures, and generate moves
         const occupiedCells = extractOccupiedCells(state.occupiedCellsMatrix);
+        const pieceMovesThisTurn = [];
         Object.keys(state.movingPieces).forEach((pieceId) => {
+          assert(
+            state.movingPieces[pieceId] === null,
+            "Piece was initialized with non-null move!"
+          );
+
           const piece = state.pieces[pieceId];
-          const pieceCaptureCells = PieceCaptureFunc[piece.type](
+
+          // These are capture cells, but basically move for most
+          let pieceMoveCells = PieceCaptureFunc[piece.type](
             piece.position,
             currPlayerPos,
             occupiedCells
           );
-          if (arrayHasVector(pieceCaptureCells, currPlayerPos)) {
-            alert("GAME OVER"); // GAME OVER
+
+          // Check if player is on a capture cell
+          if (arrayHasVector(pieceMoveCells, currPlayerPos)) {
+            // alert("GAME OVER"); // GAME OVER
+            delete state.movingPieces[pieceId];
             return state;
           }
-        });
 
-        // loop over all moving pieces and move them
-        Object.keys(state.movingPieces).forEach((pieceId) => {
-          // console.log("MOVING PIECE:", pieceId);
-          const piecePos = state.pieces[pieceId].position;
-          const newPosition = state.movingPieces[pieceId];
-          if (
-            !(
-              newPosition.x === currPlayerPos.x &&
-              newPosition.y === currPlayerPos.y
-            )
-          ) {
-            // console.log("piecePos:", piecePos);
-            // console.log("newPosition:", newPosition);
-            moveOccupiedCell(state, piecePos, newPosition, pieceId);
-            state.pieces[pieceId].position.x = newPosition.x;
-            state.pieces[pieceId].position.y = newPosition.y;
+          // if piece is a pawn, recalculate move cells
+          if (PawnTypes.includes(piece.type)) {
+            pieceMoveCells = PieceMovementFunc[piece.type](
+              piece.position,
+              currPlayerPos,
+              occupiedCells
+            );
+          }
+
+          // If the piece doesn't have anywhere to move, remove from moving pieces
+          if (pieceMoveCells.length <= 0) {
+            delete state.movingPieces[pieceId];
+            return;
+          }
+
+          // If it does have moves, try finding a valid one by checking if a random
+          // move was already chosen by a different piece, up to three times.
+          const maxRetries = 3;
+          let retry = 0;
+          let move = null;
+          while (retry < maxRetries) {
+            const newMove =
+              pieceMoveCells[Math.floor(Math.random() * pieceMoveCells.length)];
+            if (!arrayHasVector(pieceMovesThisTurn, newMove)) {
+              move = newMove;
+              break;
+            }
+            retry++;
+          }
+
+          // If no move was selected, remove from moving pieces.
+          if (move === null) {
+            delete state.movingPieces[pieceId];
           } else {
-            // console.log(
-            //   "A piece was blocked by the player!",
-            //   pieceId,
-            //   state.pieces[pieceId].type
-            // );
+            pieceMovesThisTurn.push(move);
+            state.movingPieces[pieceId] = move;
           }
         });
 
-        // loop over all pieces, and update moving pieces array
-        const newOccupiedCells = extractOccupiedCells(
-          state.occupiedCellsMatrix
-        );
-        const nextTurnMoves = [];
+        // move moving pieces
+        Object.keys(state.movingPieces).forEach((pieceId) => {
+          const piecePos = state.pieces[pieceId].position;
+          const newPosition = state.movingPieces[pieceId];
+
+          // If moving to player's position, return
+          if (
+            newPosition.x === currPlayerPos.x &&
+            newPosition.y === currPlayerPos.y
+          ) {
+            return;
+          }
+
+          assert(newPosition !== null, "Moving with a null move!");
+          assert(
+            !(newPosition.x === piecePos.x && newPosition.y === piecePos.y),
+            "Moving to own position!"
+          );
+
+          moveOccupiedCell(state, piecePos, newPosition, pieceId);
+          state.pieces[pieceId].position.x = newPosition.x;
+          state.pieces[pieceId].position.y = newPosition.y;
+        });
+
+        // update ALL of the pieces' cooldowns
         Object.keys(state.pieces).forEach((pieceId) => {
           // console.log("UPDATING PIECE:", pieceId);
           const piece = state.pieces[pieceId];
@@ -179,55 +223,26 @@ const gameSlice = createSlice({
             delete state.movingPieces[pieceId];
           }
 
-          // Non-zero cooldown is reduced by one
+          // If cooldown is not zero, reduce by one
           else {
             piece.cooldown -= 1;
-            // TODO: optimization for non-pawns to add capture cells here
-            // If cooldown is now zero, set for movement
-            if (piece.cooldown === 0) {
-              // console.log("PIECE WILL BE MOVING:", pieceId, { ...piece });
-              const moveCells = PieceMovementFunc[piece.type](
-                piece.position,
-                currPlayerPos,
-                newOccupiedCells
-              );
 
-              // If the piece has a place to move to, find a tile that isn't already
-              // another piece's next move, by picking a random tile three times. If
-              // the piece can't move anywhere, either because it has reached the retry
-              // limit or moveCells is empty, move to itself
-              if (moveCells.length > 0) {
-                const maxRetries = 3;
-                let retry = 0;
-                let move = { ...piece.position };
-                while (retry < maxRetries) {
-                  const newMove =
-                    moveCells[Math.floor(Math.random() * moveCells.length)];
-                  if (!arrayHasVector(nextTurnMoves, newMove)) {
-                    move = newMove;
-                    break;
-                  }
-                  retry++;
-                }
-                nextTurnMoves.push(move);
-                state.movingPieces[pieceId] = move;
-              } else {
-                let move = { ...piece.position };
-                nextTurnMoves.push(move);
-                state.movingPieces[pieceId] = move;
-              }
+            // If cooldown is now zero, add to moving pieces with null move
+            if (piece.cooldown === 0) {
+              state.movingPieces[pieceId] = null;
             }
           }
         });
 
         // loop over all the NEW moving pieces and update capture cells
         state.captureCells = [];
+        const newOccCells = extractOccupiedCells(state.occupiedCellsMatrix);
         Object.keys(state.movingPieces).forEach((pieceId) => {
           const piece = state.pieces[pieceId];
           const pieceCaptureCells = PieceCaptureFunc[piece.type](
             piece.position,
             currPlayerPos,
-            newOccupiedCells
+            newOccCells
           );
           state.captureCells = state.captureCells.concat(pieceCaptureCells);
         });
@@ -265,10 +280,10 @@ function verifyPlayerMovement(v1, v2) {
 }
 
 function moveOccupiedCell(state, v1, v2, pieceId) {
-  // console.log("MOVING:", v1, v2);
   assertIsVector(v1);
   assertIsVector(v2);
   if (v1.x === v2.x && v1.y === v2.y) {
+    assert(false, "Moving to own cell!");
     return;
   }
 
