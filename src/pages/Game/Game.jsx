@@ -16,6 +16,7 @@ import {
   selectPlayerCaptureCooldown,
 } from "../../data/gameSlice";
 import {
+  assert,
   getVectorSum,
   isValidCell,
   PieceType,
@@ -23,31 +24,14 @@ import {
 } from "../../global/utils";
 import Piece from "./Piece";
 
-// Initialize the grid cells
-// const gridCells = new Array(8).fill(null).map(() => new Array(8).fill(null));
-// for (let y = 0; y < 8; y++) {
-//   for (let x = 0; x < 8; x++) {
-//     const i = x + y * 8;
-//     gridCells[y][x] = <GridCell key={i} pos={{ x, y }} />;
-//   }
-// }
-
 const Game = () => {
   const dispatch = useDispatch();
   const input = useInputs();
-  const processing = useRef(false);
   const pieces = useSelector(selectAllPieces);
   const occupiedCellsMatrix = useSelector(selectOccupiedCellsMatrix);
   const captureCells = useSelector(selectCaptureCells);
   const playerPosition = useSelector(selectPlayerPosition);
   const playerCooldown = useSelector(selectPlayerCaptureCooldown);
-
-  // TEST
-
-  // DEBUG
-  // useEffect(() => {
-  //   console.log(playerPosition);
-  // }, [playerPosition]);
 
   // Initialize game
   useEffect(() => {
@@ -63,14 +47,51 @@ const Game = () => {
     })();
   }, []);
 
-  // Handle Input
-  useEffect(() => {
-    // TODO: stop input for a few seconds when starting game
-    if (input === "" || input === undefined || processing.current) return;
-    // console.log("INPUT:", `"${input}"`);
+  const [currentInput, setCurrentInput] = useState("");
+  const inputQueued = useRef("");
+  const [isProcessingInput, setIsProcessingInput] = useState(false);
 
+  // console.log("----------------------\ncurrentInput:", currentInput);
+  // console.log("inputQueued.current:", inputQueued.current);
+  // console.log("isProcessingInput:", isProcessingInput);
+
+  // The following three useEffects are for input queueing
+  // ...
+  useEffect(() => {
+    // console.log("Input Use Effect");
+    if (input === "" || input === undefined) return;
+    if (isProcessingInput) {
+      inputQueued.current = input;
+      return;
+    }
+    assert(
+      inputQueued.current === "",
+      "Adding new input when queue isn't empty!"
+    );
+    setCurrentInput(input);
+    setIsProcessingInput(true);
+  }, [input]);
+
+  useEffect(() => {
+    // console.log("IsProcessingInput Use Effect");
+    if (isProcessingInput === false) {
+      if (inputQueued.current !== "") {
+        setIsProcessingInput(true);
+        setCurrentInput(inputQueued.current);
+        inputQueued.current = "";
+      }
+    }
+  }, [isProcessingInput]);
+
+  useEffect(() => {
+    if (currentInput === "") {
+      return;
+    }
+    setCurrentInput("");
+
+    // console.log("Current Input Use Effect");
     let direction = { x: 0, y: 0 };
-    switch (input) {
+    switch (currentInput) {
       case "w":
         direction.y = -1;
         break;
@@ -89,11 +110,15 @@ const Game = () => {
         direction = null;
     }
     if (direction === null) {
+      setIsProcessingInput(false);
       return;
     }
 
     const movingTo = getVectorSum(playerPosition, direction);
-    if (!isValidCell(movingTo)) return;
+    if (!isValidCell(movingTo)) {
+      setIsProcessingInput(false);
+      return;
+    }
 
     let isCapturing = false;
     if (!(playerPosition.x === movingTo.x && playerPosition.y === movingTo.y)) {
@@ -101,24 +126,24 @@ const Game = () => {
         if (playerCooldown <= 0) {
           isCapturing = true;
         } else {
-          return; // TODO: Add attack logic
+          setIsProcessingInput(false);
+          return;
         }
       }
     }
 
     (async () => {
-      processing.current = true;
       dispatch(movePlayer(direction.x, direction.y, isCapturing));
       await sleep(100);
       // console.log("Processing pieces");
       dispatch(processPieces());
       await sleep(250);
-      processing.current = false;
+      setIsProcessingInput(false);
+      // console.log("MAIN LOGIC END -----------");
     })();
-  }, [input]);
+  }, [currentInput]);
 
-  let pieceElements;
-  pieceElements = Object.keys(pieces).map((pieceId) => {
+  const pieceComponents = Object.keys(pieces).map((pieceId) => {
     return (
       <Piece
         key={pieceId}
@@ -128,7 +153,7 @@ const Game = () => {
     );
   });
 
-  const gridCells = useMemo(() => {
+  const gridCellComponents = useMemo(() => {
     const output = new Array(8).fill(null).map(() => new Array(8).fill(null));
     for (let y = 0; y < 8; y++) {
       for (let x = 0; x < 8; x++) {
@@ -151,11 +176,11 @@ const Game = () => {
       <GameUI />
       <div className={styles.graphicsGridBorder}></div>
       <div className={styles.graphicsGridTrunk}></div>
-      <div className={styles.gridContainer}>{gridCells}</div>
+      <div className={styles.gridContainer}>{gridCellComponents}</div>
       <div className={styles.piecesContainer}>
         {/* TEST */}
         <Piece gridPos={playerPosition} type={PieceType.PLAYER} />
-        {pieceElements}
+        {pieceComponents}
       </div>
     </main>
   );
