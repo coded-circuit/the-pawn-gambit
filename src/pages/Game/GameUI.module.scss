@@ -17,21 +17,27 @@
 .upperLeft {
   left: 0;
   top: 0;
-
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  align-items: start;
 
-  p {
-    color: theme.$acc-clr-1;
+  color: theme.$acc-clr-1;
+
+  span.uiVariable {
+    margin-bottom: 0.5rem;
     font-size: 3rem;
-    span.uiLabel {
-      font-size: 1.5rem;
-      display: block;
-      margin-bottom: -0.8rem;
-    }
+  }
+
+  span.uiLabel {
+    margin-bottom: -0.5rem;
+    font-size: 1.5rem;
   }
 }
+
+.puff {
+  animation: puff 0.2s;
+}
+
 
 .upperCenter {
   $width: 60vmin;
@@ -77,4 +83,14 @@
 .lowerLeft {
   left: 0;
   bottom: 0;
+}
+
+@keyframes puff {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.3);
+  }
 }

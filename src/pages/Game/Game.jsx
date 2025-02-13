@@ -14,6 +14,9 @@ import {
   selectOccupiedCellsMatrix,
   selectCaptureCells,
   selectPlayerCaptureCooldown,
+  playerCaptureCooldown,
+  selectTurnNumber,
+  selectScore,
 } from "../../data/gameSlice";
 import {
   assert,
@@ -26,39 +29,44 @@ import Piece from "./Piece";
 
 const Game = () => {
   const dispatch = useDispatch();
-  const input = useInputs();
   const pieces = useSelector(selectAllPieces);
   const occupiedCellsMatrix = useSelector(selectOccupiedCellsMatrix);
   const captureCells = useSelector(selectCaptureCells);
   const playerPosition = useSelector(selectPlayerPosition);
-  const playerCooldown = useSelector(selectPlayerCaptureCooldown);
+  const playerCooldownLeft = useSelector(selectPlayerCaptureCooldown);
+  const turnNumber = useSelector(selectTurnNumber);
+  const score = useSelector(selectScore);
 
   // Initialize game
   useEffect(() => {
     (async () => {
       await sleep(600);
       dispatch(resetState());
-      dispatch(addPiece(0, 0, PieceType.PAWN_E));
-      dispatch(addPiece(3, 0, PieceType.PAWN_S));
-      dispatch(addPiece(1, 1, PieceType.KNIGHT));
-      dispatch(addPiece(1, 4, PieceType.QUEEN));
-      dispatch(addPiece(6, 7, PieceType.ROOK));
-      dispatch(addPiece(7, 7, PieceType.BISHOP));
+      // dispatch(addPiece(0, 0, PieceType.PAWN_E));
+      // dispatch(addPiece(3, 0, PieceType.PAWN_S));
+      // dispatch(addPiece(1, 1, PieceType.KNIGHT));
+      // dispatch(addPiece(1, 4, PieceType.QUEEN));
+      // dispatch(addPiece(6, 7, PieceType.ROOK));
+      // dispatch(addPiece(7, 7, PieceType.BISHOP));
     })();
   }, []);
 
+  // The following three useEffects are for input queueing
+  //   Input:
+  //       Receives keyboard input, and updates current input when not isProcessingInput,
+  //       otherwise queues it in inputQueued
+  //   isProcessingInput:
+  //       Whenever main logic completes, isProcessing is set to false, which this useEffect
+  //       sets back to true if there is an input queued.
+  //   currentInput:
+  //       The actual main logic only executes when the current input updates.
+
+  const input = useInputs();
   const [currentInput, setCurrentInput] = useState("");
   const inputQueued = useRef("");
   const [isProcessingInput, setIsProcessingInput] = useState(false);
 
-  // console.log("----------------------\ncurrentInput:", currentInput);
-  // console.log("inputQueued.current:", inputQueued.current);
-  // console.log("isProcessingInput:", isProcessingInput);
-
-  // The following three useEffects are for input queueing
-  // ...
   useEffect(() => {
-    // console.log("Input Use Effect");
     if (input === "" || input === undefined) return;
     if (isProcessingInput) {
       inputQueued.current = input;
@@ -73,7 +81,6 @@ const Game = () => {
   }, [input]);
 
   useEffect(() => {
-    // console.log("IsProcessingInput Use Effect");
     if (isProcessingInput === false) {
       if (inputQueued.current !== "") {
         setIsProcessingInput(true);
@@ -89,7 +96,6 @@ const Game = () => {
     }
     setCurrentInput("");
 
-    // console.log("Current Input Use Effect");
     let direction = { x: 0, y: 0 };
     switch (currentInput) {
       case "w":
@@ -123,7 +129,7 @@ const Game = () => {
     let isCapturing = false;
     if (!(playerPosition.x === movingTo.x && playerPosition.y === movingTo.y)) {
       if (occupiedCellsMatrix[movingTo.y][movingTo.x] !== false) {
-        if (playerCooldown <= 0) {
+        if (playerCooldownLeft <= 0) {
           isCapturing = true;
         } else {
           setIsProcessingInput(false);
@@ -139,10 +145,10 @@ const Game = () => {
       dispatch(processPieces());
       await sleep(250);
       setIsProcessingInput(false);
-      // console.log("MAIN LOGIC END -----------");
     })();
   }, [currentInput]);
 
+  // Renders piece components (visuals)
   const pieceComponents = useMemo(() => {
     return Object.keys(pieces).map((pieceId) => {
       return (
@@ -156,6 +162,7 @@ const Game = () => {
     });
   }, [pieces]);
 
+  // Renders grid cells
   const gridCellComponents = useMemo(() => {
     const output = new Array(8).fill(null).map(() => new Array(8).fill(null));
     for (let y = 0; y < 8; y++) {
@@ -176,7 +183,13 @@ const Game = () => {
 
   return (
     <main>
-      <GameUI />
+      <GameUI
+        turnNumber={turnNumber}
+        score={score}
+        captureCooldownPercent={
+          (1 - (playerCooldownLeft / playerCaptureCooldown)) * 100
+        }
+      />
       <div className={styles.graphicsGridBorder}></div>
       <div className={styles.graphicsGridTrunk}></div>
       <div className={styles.gridContainer}>{gridCellComponents}</div>

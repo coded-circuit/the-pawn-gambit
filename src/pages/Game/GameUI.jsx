@@ -1,27 +1,37 @@
-import { useDispatch, useSelector } from "react-redux";
-import { PageName } from "../../global/utils";
+import { useDispatch } from "react-redux";
+import { PageName, sleep } from "../../global/utils";
 import { switchPage } from "../../data/menuSlice";
 import styles from "./GameUI.module.scss";
-import {
-  playerCaptureCooldown,
-  selectPlayerCaptureCooldown,
-} from "../../data/gameSlice";
+import { useEffect, useState } from "react";
 
-const GameUI = () => {
+const GameUI = ({ captureCooldownPercent, turnNumber, score }) => {
   const dispatch = useDispatch();
-  const captureCooldown = useSelector(selectPlayerCaptureCooldown);
-  const captureCooldownPercent =
-    (1 - captureCooldown / playerCaptureCooldown) * 100;
+  const [turnNumberClass, setTurnNumberClass] = useState(styles.uiVariable);
+  const [scoreClass, setScoreClass] = useState(styles.uiVariable);
+
+  useEffect(() => {
+    (async () => {
+      setTurnNumberClass(`${styles.uiVariable} ${styles.puff}`);
+      await sleep(200);
+      setTurnNumberClass(`${styles.uiVariable}`);
+    })();
+  }, [turnNumber]);
+
+  useEffect(() => {
+    (async () => {
+      setScoreClass(`${styles.uiVariable} ${styles.puff}`);
+      await sleep(200);
+      setScoreClass(`${styles.uiVariable}`);
+    })();
+  }, [score]);
 
   return (
     <div className={styles.hud}>
       <div className={styles.upperLeft}>
-        <p>
-          <span className={styles.uiLabel}>SCORE:</span>12500
-        </p>
-        <p>
-          <span className={styles.uiLabel}>TURN:</span>5
-        </p>
+        <span className={styles.uiLabel}>SCORE:</span>
+        <span className={scoreClass}>{score}</span>
+        <span className={styles.uiLabel}>TURN:</span>
+        <span className={turnNumberClass}>{turnNumber}</span>
       </div>
       <div className={styles.upperRight}>
         <button className={styles.uiButton}>Guide</button>

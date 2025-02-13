@@ -31,6 +31,9 @@ const initialState = {
 
   // 2d matrix, either false or a pieceId
   occupiedCellsMatrix: new Array(8).fill().map(() => new Array(8).fill(false)),
+
+  turnNumber: 0,
+  score: 0,
 };
 initialState.occupiedCellsMatrix[playerSpawnPos.y][playerSpawnPos.x] =
   "ThePlayer";
@@ -47,6 +50,7 @@ const gameSlice = createSlice({
 
     movePlayer: {
       reducer(state, action) {
+        state.turnNumber += 1;
         const { x, y, isCapturing } = action.payload;
         if (state.player.captureCooldownLeft > 0) {
           state.player.captureCooldownLeft -= 1;
@@ -232,6 +236,8 @@ export const selectCaptureCells = (state) => state.game.captureCells;
 export const selectPlayerPosition = (state) => state.game.player.position;
 export const selectPlayerCaptureCooldown = (state) =>
   state.game.player.captureCooldownLeft;
+export const selectTurnNumber = (state) => state.game.turnNumber;
+export const selectScore = (state) => state.game.score;
 
 // ACTION EXPORTS --------------------------------------
 export const { resetState, movePlayer, addPiece, processPieces } =
