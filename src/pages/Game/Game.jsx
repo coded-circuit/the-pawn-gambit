@@ -47,7 +47,7 @@ const Game = () => {
     (async () => {
       dispatch(resetState());
       // await sleep(600);
-      // dispatch(addPiece(0, 0, PieceType.PAWN_E));
+      dispatch(addPiece(0, 0, PieceType.PAWN_E));
       // dispatch(addPiece(3, 0, PieceType.PAWN_S));
       // dispatch(addPiece(1, 1, PieceType.KNIGHT));
       // dispatch(addPiece(1, 4, PieceType.QUEEN));
@@ -150,11 +150,12 @@ const Game = () => {
       dispatch(movePlayer(direction.x, direction.y, isCapturing));
       await sleep(100);
       dispatch(processPieces());
-      await sleep(250);
+      await sleep(200);
       // Get directly from store to have updated cell matrix
       if (store.getState().game.gameIsOver) return;
-      if (Math.random() < 1) { // replace with spawning mechanism
-        for (let i = 0; i < 3; i++) {
+      if (Math.random() < 0.3) {
+        // replace with spawning mechanism
+        for (let i = 0; i < 1; i++) {
           const { type, pos } = getPieceWithPos(Difficulty.EASY);
           if (
             store.getState().game.occupiedCellsMatrix[pos.y][pos.x] === false
@@ -162,7 +163,7 @@ const Game = () => {
             dispatch(addPiece(pos.x, pos.y, type));
           }
         }
-        await sleep(200);
+        await sleep(100);
       }
       setIsProcessingInput(false);
     })();

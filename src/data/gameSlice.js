@@ -13,6 +13,7 @@ import {
   Difficulty,
   getPieceCaptureScoreIncrease,
   PawnTypes,
+  OfficerTypes,
 } from "../global/utils";
 
 export const playerCaptureCooldown = 10;
@@ -126,13 +127,7 @@ const gameSlice = createSlice({
         );
         assert(type !== PieceType.PLAYER, "Trying to add a new player!");
 
-        const pieceId = nanoid();
-        const newPiece = {
-          position: { x, y },
-          type,
-          cooldown: PieceCooldown[type],
-          isCaptured: false,
-        };
+        const { pieceId, newPiece } = createPiece(x, y, type);
         state.pieces[pieceId] = newPiece;
         state.occupiedCellsMatrix[y][x] = pieceId;
         // console.log("ADDED NEW PIECE!", pieceId, newPiece);
@@ -168,7 +163,6 @@ const gameSlice = createSlice({
 
           // Check if player is on a capture cell
           if (arrayHasVector(pieceMoveCells, currPlayerPos)) {
-            // alert("GAME OVER"); // GAME OVER
             gameOver = true;
             state.occupiedCellsMatrix[currPlayerPos.y][currPlayerPos.x] = false;
             moveOccupiedCell(state, piece.position, currPlayerPos, pieceId);
@@ -247,6 +241,27 @@ const gameSlice = createSlice({
           moveOccupiedCell(state, piecePos, newPosition, pieceId);
           state.pieces[pieceId].position.x = newPosition.x;
           state.pieces[pieceId].position.y = newPosition.y;
+          state.pieces[pieceId].movesMade += 1;
+
+          // Check for promoting pawns
+          const piece = state.pieces[pieceId];
+          const pos = state.pieces[pieceId].position;
+          if (PawnTypes.includes(piece.type)) {
+            if (piece.movesMade === 7) {
+              piece.isCaptured = true;
+              state.queuedForDeletion.push(pieceId);
+
+              const promotionType =
+                OfficerTypes[Math.floor(Math.random() * OfficerTypes.length)];
+              const { pieceId: newPieceId, newPiece } = createPiece(
+                pos.x,
+                pos.y,
+                promotionType
+              );
+              state.pieces[newPieceId] = newPiece;
+              state.occupiedCellsMatrix[pos.y][pos.x] = newPieceId;
+            }
+          }
         });
 
         // update ALL of the pieces' cooldowns
@@ -347,4 +362,16 @@ function extractOccupiedCells(matrix) {
     }
   }
   return output;
+}
+
+function createPiece(x, y, type) {
+  const pieceId = nanoid();
+  const newPiece = {
+    position: { x, y },
+    type,
+    cooldown: PieceCooldown[type],
+    isCaptured: false,
+    movesMade: 0,
+  };
+  return { pieceId, newPiece };
 }
