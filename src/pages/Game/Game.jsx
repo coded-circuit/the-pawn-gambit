@@ -17,6 +17,7 @@ import {
   playerCaptureCooldown,
   selectTurnNumber,
   selectScore,
+  selectGameIsOver,
 } from "../../data/gameSlice";
 import {
   assert,
@@ -39,12 +40,13 @@ const Game = () => {
   const playerCooldownLeft = useSelector(selectPlayerCaptureCooldown);
   const turnNumber = useSelector(selectTurnNumber);
   const score = useSelector(selectScore);
+  const gameIsOver = useSelector(selectGameIsOver);
 
   // Initialize game
   useEffect(() => {
     (async () => {
-      await sleep(600);
       dispatch(resetState());
+      // await sleep(600);
       // dispatch(addPiece(0, 0, PieceType.PAWN_E));
       // dispatch(addPiece(3, 0, PieceType.PAWN_S));
       // dispatch(addPiece(1, 1, PieceType.KNIGHT));
@@ -70,6 +72,7 @@ const Game = () => {
   const [isProcessingInput, setIsProcessingInput] = useState(false);
 
   useEffect(() => {
+    if (gameIsOver) return;
     if (input === "" || input === undefined) return;
     if (isProcessingInput) {
       inputQueued.current = input;
@@ -84,6 +87,7 @@ const Game = () => {
   }, [input]);
 
   useEffect(() => {
+    if (gameIsOver) return;
     if (isProcessingInput === false) {
       if (inputQueued.current !== "") {
         setIsProcessingInput(true);
@@ -94,6 +98,7 @@ const Game = () => {
   }, [isProcessingInput]);
 
   useEffect(() => {
+    if (gameIsOver) return;
     if (currentInput === "") {
       return;
     }
@@ -144,13 +149,13 @@ const Game = () => {
     (async () => {
       dispatch(movePlayer(direction.x, direction.y, isCapturing));
       await sleep(100);
-      // console.log("Processing pieces");
       dispatch(processPieces());
       await sleep(250);
-      if (Math.random() < 1) {
-        for (let i = 0; i < 1; i++) {
+      // Get directly from store to have updated cell matrix
+      if (store.getState().game.gameIsOver) return;
+      if (Math.random() < 1) { // replace with spawning mechanism
+        for (let i = 0; i < 3; i++) {
           const { type, pos } = getPieceWithPos(Difficulty.EASY);
-          // Get directly from store to have updated cell matrix
           if (
             store.getState().game.occupiedCellsMatrix[pos.y][pos.x] === false
           ) {
@@ -158,7 +163,6 @@ const Game = () => {
           }
         }
         await sleep(200);
-        // console.log("----------------------------");
       }
       setIsProcessingInput(false);
     })();
@@ -172,7 +176,9 @@ const Game = () => {
           key={pieceId}
           gridPos={pieces[pieceId].position}
           type={pieces[pieceId].type}
-          willMove={pieces[pieceId].cooldown === 0}
+          cooldownLeft={pieces[pieceId].cooldown}
+          isCaptured={pieces[pieceId].isCaptured}
+          // willMove={pieces[pieceId].cooldown === 0}
         />
       );
     });
@@ -183,14 +189,8 @@ const Game = () => {
     const output = new Array(8).fill(null).map(() => new Array(8).fill(null));
     for (let y = 0; y < 8; y++) {
       for (let x = 0; x < 8; x++) {
-        const DEBUG_OCCUPIED = occupiedCellsMatrix[y][x] !== false;
         output[y][x] = (
-          <GridCell
-            key={x + y * 8}
-            pos={{ x, y }}
-            isCapture={false}
-            debug={{ occupied: DEBUG_OCCUPIED }}
-          />
+          <GridCell key={x + y * 8} pos={{ x, y }} isCapture={false} />
         );
       }
     }
@@ -222,7 +222,11 @@ const Game = () => {
       <div className={styles.gridContainer}>{gridCellComponents}</div>
       <div className={styles.piecesContainer}>
         {/* TEST */}
-        <Piece gridPos={playerPosition} type={PieceType.PLAYER} />
+        <Piece
+          gridPos={playerPosition}
+          type={PieceType.PLAYER}
+          isCaptured={gameIsOver}
+        />
         {pieceComponents}
       </div>
     </main>

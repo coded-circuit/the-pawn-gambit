@@ -9,7 +9,7 @@ import Rook from "./PieceComponents/Rook";
 import Pawn from "./PieceComponents/Pawn";
 import Player from "./PieceComponents/Player";
 
-const Piece = ({ gridPos, type, willMove }) => {
+const Piece = ({ gridPos, type, cooldownLeft, isCaptured }) => {
   assertIsVector(gridPos);
 
   const [isMoving, setIsMoving] = useState(false);
@@ -18,6 +18,7 @@ const Piece = ({ gridPos, type, willMove }) => {
     top: (gridPos.y * 65) / 8 + "vmin",
     left: (gridPos.x * 65) / 8 + "vmin",
     zIndex: gridPos.y * 8 + gridPos.x,
+    opacity: isCaptured ? 0.0 : 1.0,
   };
 
   useEffect(() => {
@@ -65,7 +66,7 @@ const Piece = ({ gridPos, type, willMove }) => {
         }
       >
         <div
-          className={willMove ? styles.jiggleReference : styles.danceReference}
+          className={cooldownLeft === 0 ? styles.jiggleReference : cooldownLeft === 99 ? styles.celebrateReference : styles.danceReference}
           // className={styles.danceReference}
         >
           {pieceComponent}

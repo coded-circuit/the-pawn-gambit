@@ -36,8 +36,12 @@ const initialState = {
   // 2d matrix, either false or a pieceId
   occupiedCellsMatrix: new Array(8).fill().map(() => new Array(8).fill(false)),
 
+  // []pieceId
+  queuedForDeletion: [],
+
   turnNumber: 0,
   score: 0,
+  gameIsOver: false,
 };
 initialState.occupiedCellsMatrix[playerSpawnPos.y][playerSpawnPos.x] =
   "ThePlayer";
@@ -68,6 +72,12 @@ const gameSlice = createSlice({
         const currPosition = state.player.position;
         const newPosition = getVectorSum(currPosition, { x, y });
 
+        // Clears queued for deletion
+        state.queuedForDeletion.forEach((pieceId, i) => {
+          delete state.pieces[pieceId];
+        });
+        state.queuedForDeletion = [];
+
         if (isCapturing) {
           assert(
             state.occupiedCellsMatrix[newPosition.y][newPosition.x] !== false,
@@ -76,17 +86,28 @@ const gameSlice = createSlice({
           const capturedPieceId =
             state.occupiedCellsMatrix[newPosition.y][newPosition.x];
 
+          // Update player score
           state.score += getPieceCaptureScoreIncrease(
             Difficulty.EASY,
             state.pieces[capturedPieceId].type
           );
+
+          // Remove from matrix, update properties, remove from moving pieces
           state.occupiedCellsMatrix[newPosition.y][newPosition.x] = false;
-          delete state.pieces[capturedPieceId];
+          state.pieces[capturedPieceId].isCaptured = true;
+          state.pieces[capturedPieceId].cooldown = 150;
           delete state.movingPieces[capturedPieceId];
+
+          // Instead of deleting immediately, queue it for deletion for next player move
+          state.queuedForDeletion.push(capturedPieceId);
+
+          // Reset player capture cooldown
           state.player.captureCooldownLeft = playerCaptureCooldown;
         }
 
-        verifyPlayerMovement(currPosition, newPosition);
+        verifyPlayerMovement(currPosition, newPosition); // Basically an assert
+
+        // Since player doesn't have a piece id, set it as "ThePlayer"
         moveOccupiedCell(state, currPosition, newPosition, "ThePlayer");
         state.player.position.x = newPosition.x;
         state.player.position.y = newPosition.y;
@@ -110,6 +131,7 @@ const gameSlice = createSlice({
           position: { x, y },
           type,
           cooldown: PieceCooldown[type],
+          isCaptured: false,
         };
         state.pieces[pieceId] = newPiece;
         state.occupiedCellsMatrix[y][x] = pieceId;
@@ -127,11 +149,13 @@ const gameSlice = createSlice({
         // loop over all moving pieces, check for captures, and generate moves
         const occupiedCells = extractOccupiedCells(state.occupiedCellsMatrix);
         const pieceMovesThisTurn = [];
+        let gameOver = false;
         Object.keys(state.movingPieces).forEach((pieceId) => {
           assert(
             state.movingPieces[pieceId] === null,
             "Piece was initialized with non-null move!"
           );
+          if (gameOver) return;
 
           const piece = state.pieces[pieceId];
 
@@ -145,8 +169,12 @@ const gameSlice = createSlice({
           // Check if player is on a capture cell
           if (arrayHasVector(pieceMoveCells, currPlayerPos)) {
             // alert("GAME OVER"); // GAME OVER
-            delete state.movingPieces[pieceId];
-            return state;
+            gameOver = true;
+            state.occupiedCellsMatrix[currPlayerPos.y][currPlayerPos.x] = false;
+            moveOccupiedCell(state, piece.position, currPlayerPos, pieceId);
+            state.pieces[pieceId].position.x = currPlayerPos.x;
+            state.pieces[pieceId].position.y = currPlayerPos.y;
+            return;
           }
 
           // if piece is a pawn, recalculate move cells
@@ -187,6 +215,15 @@ const gameSlice = createSlice({
             state.movingPieces[pieceId] = move;
           }
         });
+        if (gameOver) {
+          state.movingPieces = {};
+          state.captureCells = [];
+          Object.keys(state.pieces).forEach((pieceId) => {
+            state.pieces[pieceId].cooldown = 99;
+          });
+          state.gameIsOver = true;
+          return state;
+        }
 
         // move moving pieces
         Object.keys(state.movingPieces).forEach((pieceId) => {
@@ -265,6 +302,7 @@ export const selectPlayerCaptureCooldown = (state) =>
   state.game.player.captureCooldownLeft;
 export const selectTurnNumber = (state) => state.game.turnNumber;
 export const selectScore = (state) => state.game.score;
+export const selectGameIsOver = (state) => state.game.gameIsOver;
 
 // ACTION EXPORTS --------------------------------------
 export const { resetState, movePlayer, addPiece, processPieces } =
