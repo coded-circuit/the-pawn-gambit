@@ -166,6 +166,7 @@ button {
   }
 
   &:active {
+    color: $acc-clr-3; // TEST THIS!!!
     animation: strongShake 0.1s;
   }
 

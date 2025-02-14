@@ -100,31 +100,69 @@ export const PieceMovementFunc = {
   },
 };
 export const PieceCaptureFunc = {
-  [PieceType.PLAYER]: PieceMovementFunc[PieceType.PLAYER],
-  [PieceType.QUEEN]: PieceMovementFunc[PieceType.QUEEN],
-  [PieceType.ROOK]: PieceMovementFunc[PieceType.ROOK],
-  [PieceType.BISHOP]: PieceMovementFunc[PieceType.BISHOP],
-  [PieceType.KNIGHT]: PieceMovementFunc[PieceType.KNIGHT],
+  [PieceType.PLAYER]: (pos, playerPos, occupied) => {
+    assert(false, "Player does not have a movement function");
+  },
+  [PieceType.QUEEN]: (pos, playerPos, occupied) => {
+    return [].concat(
+      getCaptureCellsByDirection(pos, 1, 0, playerPos, occupied),
+      getCaptureCellsByDirection(pos, 1, 1, playerPos, occupied),
+      getCaptureCellsByDirection(pos, 0, 1, playerPos, occupied),
+      getCaptureCellsByDirection(pos, -1, 1, playerPos, occupied),
+      getCaptureCellsByDirection(pos, -1, 0, playerPos, occupied),
+      getCaptureCellsByDirection(pos, -1, -1, playerPos, occupied),
+      getCaptureCellsByDirection(pos, 0, -1, playerPos, occupied),
+      getCaptureCellsByDirection(pos, 1, -1, playerPos, occupied)
+    );
+  },
+  [PieceType.ROOK]: (pos, playerPos, occupied) => {
+    return [].concat(
+      getCaptureCellsByDirection(pos, 1, 0, playerPos, occupied),
+      getCaptureCellsByDirection(pos, 0, 1, playerPos, occupied),
+      getCaptureCellsByDirection(pos, -1, 0, playerPos, occupied),
+      getCaptureCellsByDirection(pos, 0, -1, playerPos, occupied)
+    );
+  },
+  [PieceType.BISHOP]: (pos, playerPos, occupied) => {
+    return [].concat(
+      getCaptureCellsByDirection(pos, 1, 1, playerPos, occupied),
+      getCaptureCellsByDirection(pos, -1, 1, playerPos, occupied),
+      getCaptureCellsByDirection(pos, -1, -1, playerPos, occupied),
+      getCaptureCellsByDirection(pos, 1, -1, playerPos, occupied)
+    );
+  },
+  [PieceType.KNIGHT]: (pos, playerPos, occupied) => {
+    return getCaptureCellsByOffset(pos, playerPos, occupied, [
+      { x: 1, y: 2 },
+      { x: 2, y: 1 },
+      { x: 2, y: -1 },
+      { x: 1, y: -2 },
+      { x: -1, y: -2 },
+      { x: -2, y: -1 },
+      { x: -2, y: 1 },
+      { x: -1, y: 2 },
+    ]);
+  },
   [PieceType.PAWN_N]: (pos, playerPos, occupied) => {
-    return getMoveCellsByOffset(pos, playerPos, occupied, [
+    return getCaptureCellsByOffset(pos, playerPos, occupied, [
       { x: -1, y: -1 },
       { x: 1, y: -1 },
     ]);
   },
   [PieceType.PAWN_E]: (pos, playerPos, occupied) => {
-    return getMoveCellsByOffset(pos, playerPos, occupied, [
+    return getCaptureCellsByOffset(pos, playerPos, occupied, [
       { x: 1, y: -1 },
       { x: 1, y: 1 },
     ]);
   },
   [PieceType.PAWN_W]: (pos, playerPos, occupied) => {
-    return getMoveCellsByOffset(pos, playerPos, occupied, [
+    return getCaptureCellsByOffset(pos, playerPos, occupied, [
       { x: -1, y: -1 },
       { x: -1, y: 1 },
     ]);
   },
   [PieceType.PAWN_S]: (pos, playerPos, occupied) => {
-    return getMoveCellsByOffset(pos, playerPos, occupied, [
+    return getCaptureCellsByOffset(pos, playerPos, occupied, [
       { x: -1, y: 1 },
       { x: 1, y: 1 },
     ]);
@@ -391,4 +429,39 @@ function removeVectorInArray(array, vector) {
   return array.filter((item) => {
     return item.x !== vector.x || item.y !== vector.y;
   });
+}
+
+function getCaptureCellsByOffset(piecePos, playerPos, obs, offsets) {
+  assertIsVector(piecePos);
+  assertIsVector(playerPos);
+  const { x: origX, y: origY } = piecePos;
+
+  const output = [];
+  offsets.forEach((offset) => {
+    assertIsVector(offset);
+    const move = { x: origX + offset.x, y: origY + offset.y };
+    if (isValidCell(move)) {
+      output.push(move);
+    }
+  });
+  return output;
+}
+
+function getCaptureCellsByDirection(piecePos, dirX, dirY, playerPos, obs) {
+  assertIsVector(piecePos);
+  assertIsVector(playerPos);
+  const obstacles = removeVectorInArray(obs, playerPos);
+  const { x: origX, y: origY } = piecePos;
+
+  const output = [];
+  const currCell = { x: origX + dirX, y: origY + dirY };
+  while (isValidCell(currCell)) {
+    output.push({ ...currCell });
+    if (arrayHasVector(obstacles, currCell)) {
+      break;
+    }
+    currCell.x += dirX;
+    currCell.y += dirY;
+  }
+  return output;
 }

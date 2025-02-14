@@ -145,15 +145,14 @@ const gameSlice = createSlice({
 
           const piece = state.pieces[pieceId];
 
-          // These are capture cells, but basically move for most
-          let pieceMoveCells = PieceCaptureFunc[piece.type](
+          let pieceCaptureCells = PieceCaptureFunc[piece.type](
             piece.position,
             currPlayerPos,
             occupiedCells
           );
 
           // Check if player is on a capture cell
-          if (arrayHasVector(pieceMoveCells, currPlayerPos)) {
+          if (arrayHasVector(pieceCaptureCells, currPlayerPos)) {
             gameOver = true;
             state.occupiedCellsMatrix[currPlayerPos.y][currPlayerPos.x] = false;
             moveOccupiedCell(state, piece.position, currPlayerPos, pieceId);
@@ -162,14 +161,11 @@ const gameSlice = createSlice({
             return;
           }
 
-          // if piece is a pawn, recalculate move cells
-          if (PawnTypes.includes(piece.type)) {
-            pieceMoveCells = PieceMovementFunc[piece.type](
-              piece.position,
-              currPlayerPos,
-              occupiedCells
-            );
-          }
+          const pieceMoveCells = PieceMovementFunc[piece.type](
+            piece.position,
+            currPlayerPos,
+            occupiedCells
+          );
 
           // If the piece doesn't have anywhere to move, remove from moving pieces
           if (pieceMoveCells.length <= 0) {
