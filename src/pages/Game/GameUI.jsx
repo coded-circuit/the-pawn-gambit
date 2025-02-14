@@ -3,6 +3,9 @@ import { PageName, sleep } from "../../global/utils";
 import { switchPage } from "../../data/menuSlice";
 import styles from "./GameUI.module.scss";
 import { useEffect, useState } from "react";
+import Quit from "./GameUIComponents/Quit";
+import Reset from "./GameUIComponents/Reset";
+import Guide from "./GameUIComponents/Guide";
 
 const GameUI = ({ captureCooldownPercent, turnNumber, score }) => {
   const dispatch = useDispatch();
@@ -34,15 +37,19 @@ const GameUI = ({ captureCooldownPercent, turnNumber, score }) => {
         <span className={turnNumberClass}>{turnNumber}</span>
       </div>
       <div className={styles.upperRight}>
-        <button className={styles.uiButton}>Guide</button>
-        <button className={styles.uiButton}>Reset</button>
+        {/* <button className={styles.uiButton}>
+          <Guide />
+        </button> */}
+        <button className={styles.uiButton} onClick={() => {}}>
+          <Reset />
+        </button>
         <button
           className={styles.uiButton}
           onClick={() => {
             dispatch(switchPage(PageName.MAIN_MENU));
           }}
         >
-          Pause
+          <Quit />
         </button>
       </div>
       <div className={styles.lowerLeft}>

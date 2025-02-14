@@ -14,6 +14,8 @@ $cell-clr-2: #c69b6b;
 $stripe-scale: 6rem;
 $stripe-color: #f1ddc6;
 $checker-scale: 12rem;
+$checker-clr-1: $acc-clr-1;
+$checker-clr-2: #7f5656;
 
 $z-ind-transition: 99;
 $z-ind-game-ui: 90;
@@ -22,6 +24,7 @@ $z-ind-grid-pieces-shadow: 4;
 $z-ind-grid: 3;
 $z-ind-grid-border: 2;
 $z-ind-grid-trunk: 1;
+$z-ind-modal: 91;
 
 $grid-scale: 65vmin;
 
@@ -47,29 +50,29 @@ body {
   background-color: $acc-clr-1;
   background-image: linear-gradient(
       -45deg,
-      $acc-clr-2 0,
-      $acc-clr-2 25%,
+      $checker-clr-2 0,
+      $checker-clr-2 25%,
       transparent 25%,
       transparent 100%
     ),
     linear-gradient(
       45deg,
-      $acc-clr-2 0,
-      $acc-clr-2 25%,
+      $checker-clr-2 0,
+      $checker-clr-2 25%,
       transparent 25%,
       transparent 100%
     ),
     linear-gradient(
       135deg,
-      $acc-clr-2 0,
-      $acc-clr-2 25%,
+      $checker-clr-2 0,
+      $checker-clr-2 25%,
       transparent 25%,
       transparent 100%
     ),
     linear-gradient(
       -135deg,
-      $acc-clr-2 0,
-      $acc-clr-2 25%,
+      $checker-clr-2 0,
+      $checker-clr-2 25%,
       transparent 25%,
       transparent 100%
     );

@@ -25,19 +25,18 @@
 
   span.uiVariable {
     margin-bottom: 0.5rem;
-    font-size: 3rem;
+    font-size: 4rem;
   }
 
   span.uiLabel {
     margin-bottom: -0.5rem;
-    font-size: 1.5rem;
+    font-size: 2rem;
   }
 }
 
 .puff {
   animation: puff 0.2s;
 }
-
 
 .upperCenter {
   $width: 60vmin;
