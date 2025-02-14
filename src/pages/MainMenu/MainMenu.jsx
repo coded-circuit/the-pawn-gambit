@@ -19,7 +19,7 @@ const MainMenu = () => {
   return (
     <main className={styles.mainMenu}>
       <div>
-        <h1>
+        <h1 className={styles.logo}>
           <span className={styles.subtitle}>PAWN's</span> GAMBIT
         </h1>
         <button

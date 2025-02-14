@@ -20,16 +20,16 @@ import {
   selectGameIsOver,
 } from "../../data/gameSlice";
 import {
-  assert,
-  Difficulty,
   getPieceWithPos,
   getVectorSum,
   isValidCell,
   PieceType,
   sleep,
+  getNumberToSpawn,
 } from "../../global/utils";
 import Piece from "./Piece";
 import store from "../../data/store";
+import { selectDifficulty } from "../../data/menuSlice";
 
 const Game = () => {
   const dispatch = useDispatch();
@@ -41,6 +41,7 @@ const Game = () => {
   const turnNumber = useSelector(selectTurnNumber);
   const score = useSelector(selectScore);
   const gameIsOver = useSelector(selectGameIsOver);
+  const difficulty = useSelector(selectDifficulty);
 
   // Initialize game
   useEffect(() => {
@@ -147,24 +148,23 @@ const Game = () => {
     }
 
     (async () => {
-      dispatch(movePlayer(direction.x, direction.y, isCapturing));
+      dispatch(movePlayer(direction.x, direction.y, isCapturing, difficulty));
       await sleep(100);
       dispatch(processPieces());
       await sleep(200);
-      // Get directly from store to have updated cell matrix
-      if (store.getState().game.gameIsOver) return;
-      if (Math.random() < 0.3) {
-        // replace with spawning mechanism
-        for (let i = 0; i < 1; i++) {
-          const { type, pos } = getPieceWithPos(Difficulty.EASY);
-          if (
-            store.getState().game.occupiedCellsMatrix[pos.y][pos.x] === false
-          ) {
-            dispatch(addPiece(pos.x, pos.y, type));
-          }
+
+      if (store.getState().game.gameIsOver) return; // Get directly from store to have updated data
+      const numberToSpawn = getNumberToSpawn(difficulty);
+      console.log(numberToSpawn);
+      for (let i = 0; i < numberToSpawn; i++) {
+        const { type, pos } = getPieceWithPos(difficulty);
+
+        // Get directly from store to have updated data
+        if (store.getState().game.occupiedCellsMatrix[pos.y][pos.x] === false) {
+          dispatch(addPiece(pos.x, pos.y, type));
         }
-        await sleep(100);
       }
+      await sleep(100);
       setIsProcessingInput(false);
     })();
   }, [currentInput]);

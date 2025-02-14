@@ -185,6 +185,26 @@ const edgeToPawns = [
   PieceType.PAWN_E,
   PieceType.PAWN_N,
 ];
+
+export function getNumberToSpawn(difficulty) {
+  const rand = Math.random();
+  switch (difficulty) {
+    case Difficulty.EASY:
+      if (rand < 0.3) return 1;
+      return 0;
+    case Difficulty.NORMAL:
+      if (rand < 0.1) return 2;
+      if (rand < 0.5) return 1;
+      return 0;
+    case Difficulty.HARD:
+      if (rand < 0.2) return 2;
+      if (rand < 0.5) return 1;
+      return 0;
+    default:
+      assert(false, "Invalid difficulty in getNumberToSpawn!", difficulty);
+  }
+}
+
 export function getPieceWithPos(difficulty) {
   const { edge, randomPoint: pos } = pickSpawnPoint();
   const type = choosePieceToSpawn(difficulty);

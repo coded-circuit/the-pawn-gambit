@@ -13,7 +13,7 @@ $cell-clr-2: #c69b6b;
 
 $stripe-scale: 6rem;
 $stripe-color: #f1ddc6;
-$checker-scale: 6rem;
+$checker-scale: 12rem;
 
 $z-ind-transition: 99;
 $z-ind-game-ui: 90;
@@ -75,7 +75,8 @@ body {
     );
 
   background-size: $checker-scale $checker-scale;
-  background-position: $checker-scale $checker-scale;
+  background-position: 10rem 0;
+  // background-position: $checker-scale $checker-scale;
 }
 
 @mixin movingStripes {
@@ -89,6 +90,46 @@ body {
   $size: $stripe-scale * sqrt(8); // I honestly don't know why sqrt 8 works
   background-size: $size $size;
   animation: stripeMovement 6s linear infinite;
+}
+
+@mixin mainMenuContainer {
+  width: 60vmin;
+  height: 100vh;
+  color: $light-clr-1;
+  margin-inline: auto;
+  // max-width: 700px;
+
+  // @media (max-width: 575px) {
+  //   max-width: 250px;
+  // }
+  // @media (min-width: 576px) {
+  //   max-width: 250px;
+  // }
+  // @media (min-width: 768px) {
+  //   max-width: 300px;
+  // }
+  // @media (min-width: 992px) {
+  //   max-width: 400px;
+  // }
+  // @media (min-width: 1200px) {
+  //   max-width: 500px;
+  // }
+  // @media (min-width: 1900px) {
+  //   max-width: 700px;
+  // }
+
+  div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    @include checkered;
+
+    height: 100%;
+    // clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 95%, 0% 70%);
+    // clip-path: polygon(10% 0, 90% 0, 90% 100%, 10% 100%);
+  }
 }
 
 @keyframes stripeMovement {
@@ -105,8 +146,8 @@ button {
   background: none;
   border: none;
   outline: none;
-  font-size: 1.5rem;
-  text-shadow: 0 0rem 0.5rem black;
+  font-size: 2.5rem;
+  text-shadow: 0 0rem 1rem black;
   padding: 0.5rem;
 
   &:hover {
@@ -171,5 +212,41 @@ button {
   }
   75% {
     transform: rotate(2deg) scale(1.02);
+  }
+}
+
+@media (max-width: 575px) {
+  html {
+    font-size: 10px; /* Reduce base size */
+  }
+}
+
+@media (min-width: 575px) {
+  html {
+    font-size: 10px; /* Reduce base size */
+  }
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 12px; /* Default size */
+  }
+}
+
+@media (min-width: 992px) {
+  html {
+    font-size: 14px; /* Increase for readability */
+  }
+}
+
+@media (min-width: 1200px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1900px) {
+  html {
+    font-size: 20px;
   }
 }

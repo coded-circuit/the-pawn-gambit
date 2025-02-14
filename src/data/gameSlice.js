@@ -10,13 +10,12 @@ import {
   arrayHasVector,
   PieceMovementFunc,
   getPassiveScoreIncrease,
-  Difficulty,
   getPieceCaptureScoreIncrease,
   PawnTypes,
   OfficerTypes,
 } from "../global/utils";
 
-export const playerCaptureCooldown = 10;
+export const playerCaptureCooldown = 6;
 const playerSpawnPos = { x: 3, y: 4 };
 const initialState = {
   // pieceId: { position, type, cooldown }
@@ -59,12 +58,9 @@ const gameSlice = createSlice({
 
     movePlayer: {
       reducer(state, action) {
+        const { x, y, isCapturing, difficulty } = action.payload;
         state.turnNumber += 1;
-        state.score += getPassiveScoreIncrease(
-          Difficulty.EASY,
-          state.turnNumber
-        );
-        const { x, y, isCapturing } = action.payload;
+        state.score += getPassiveScoreIncrease(difficulty, state.turnNumber);
         if (state.player.captureCooldownLeft > 0) {
           state.player.captureCooldownLeft -= 1;
         }
@@ -74,8 +70,9 @@ const gameSlice = createSlice({
         const newPosition = getVectorSum(currPosition, { x, y });
 
         // Clears queued for deletion
-        state.queuedForDeletion.forEach((pieceId, i) => {
+        state.queuedForDeletion.forEach((pieceId) => {
           delete state.pieces[pieceId];
+          delete state.movingPieces[pieceId];
         });
         state.queuedForDeletion = [];
 
@@ -89,18 +86,12 @@ const gameSlice = createSlice({
 
           // Update player score
           state.score += getPieceCaptureScoreIncrease(
-            Difficulty.EASY,
+            difficulty,
             state.pieces[capturedPieceId].type
           );
 
-          // Remove from matrix, update properties, remove from moving pieces
-          state.occupiedCellsMatrix[newPosition.y][newPosition.x] = false;
-          state.pieces[capturedPieceId].isCaptured = true;
-          state.pieces[capturedPieceId].cooldown = 150;
-          delete state.movingPieces[capturedPieceId];
-
           // Instead of deleting immediately, queue it for deletion for next player move
-          state.queuedForDeletion.push(capturedPieceId);
+          queueDelete(state, capturedPieceId);
 
           // Reset player capture cooldown
           state.player.captureCooldownLeft = playerCaptureCooldown;
@@ -113,8 +104,8 @@ const gameSlice = createSlice({
         state.player.position.x = newPosition.x;
         state.player.position.y = newPosition.y;
       },
-      prepare(x, y, isCapturing) {
-        return { payload: { x, y, isCapturing } };
+      prepare(x, y, isCapturing, difficulty) {
+        return { payload: { x, y, isCapturing, difficulty } };
       },
     },
 
@@ -248,8 +239,7 @@ const gameSlice = createSlice({
           const pos = state.pieces[pieceId].position;
           if (PawnTypes.includes(piece.type)) {
             if (piece.movesMade === 7) {
-              piece.isCaptured = true;
-              state.queuedForDeletion.push(pieceId);
+              queueDelete(state, pieceId);
 
               const promotionType =
                 OfficerTypes[Math.floor(Math.random() * OfficerTypes.length)];
@@ -374,4 +364,13 @@ function createPiece(x, y, type) {
     movesMade: 0,
   };
   return { pieceId, newPiece };
+}
+
+function queueDelete(state, pieceId) {
+  const pos = state.pieces[pieceId].position;
+  state.occupiedCellsMatrix[pos.y][pos.x] = false;
+  state.pieces[pieceId].isCaptured = true;
+  state.pieces[pieceId].cooldown = 150;
+  delete state.movingPieces[pieceId];
+  state.queuedForDeletion.push(pieceId);
 }
