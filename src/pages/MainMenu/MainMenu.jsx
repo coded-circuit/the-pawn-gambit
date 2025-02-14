@@ -20,7 +20,7 @@ const MainMenu = () => {
     <main className={styles.mainMenu}>
       <div>
         <h1 className={styles.logo}>
-          <span className={styles.subtitle}>PAWN's</span> GAMBIT
+          <span className={styles.subtitle}>THE LAST</span>PAWN
         </h1>
         <button
           onMouseDown={(e) => e.preventDefault()}
@@ -37,7 +37,7 @@ const MainMenu = () => {
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => {
             if (hasClicked) return;
-            dispatch(switchPage(PageName.OPTIONS));
+            dispatch(switchPage(PageName.HOW_TO_PLAY));
             setHasClicked(true);
           }}
           disabled={disabled}

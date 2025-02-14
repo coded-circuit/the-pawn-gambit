@@ -4,15 +4,14 @@ h1.heading {
   @include theme.heading;
 }
 
-p.optionLabel {
+p.instruction {
   color: theme.$light-clr-2;
   font-size: 2rem;
-  margin-top: 1em;
   text-shadow: 0 0rem 0.6rem black;
-}
+  text-align: center;
+  padding-inline: 1rem;
 
-button.optionButton {
-  font-size: 3rem;
+  margin-top: 2em;
 }
 
 button.backButton {
@@ -20,6 +19,6 @@ button.backButton {
   margin-top: 3rem;
 }
 
-.optionsMenu {
+.howToPlayMenu {
   @include theme.mainMenuContainer;
 }

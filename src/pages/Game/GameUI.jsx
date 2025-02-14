@@ -8,7 +8,12 @@ import Reset from "./GameUIComponents/Reset";
 import Guide from "./GameUIComponents/Guide";
 import { resetState } from "../../data/gameSlice";
 
-const GameUI = ({ captureCooldownPercent, turnNumber, score }) => {
+const GameUI = ({
+  swipeHandlers,
+  captureCooldownPercent,
+  turnNumber,
+  score,
+}) => {
   const dispatch = useDispatch();
   const [turnNumberClass, setTurnNumberClass] = useState(styles.uiVariable);
   const [scoreClass, setScoreClass] = useState(styles.uiVariable);
@@ -30,7 +35,7 @@ const GameUI = ({ captureCooldownPercent, turnNumber, score }) => {
   }, [score]);
 
   return (
-    <div className={styles.hud}>
+    <div className={styles.hud} {...swipeHandlers}>
       <div className={styles.upperLeft}>
         <span className={styles.uiLabel}>SCORE:</span>
         <span className={scoreClass}>{score}</span>
@@ -69,7 +74,9 @@ const GameUI = ({ captureCooldownPercent, turnNumber, score }) => {
         <div className={styles.cooldownBar}>
           <div className={styles.cooldownBarBG}>
             <div
-              className={styles.cooldownBarFill}
+              className={`${styles.cooldownBarFill} ${
+                captureCooldownPercent >= 100.0 ? styles.barFull : ""
+              }`}
               style={{ width: `${captureCooldownPercent}%` }}
             ></div>
           </div>

@@ -220,6 +220,13 @@ button {
   animation: breathing 3s ease-out infinite;
 }
 
+@mixin heading {
+  color: $light-clr-2;
+  font-size: 5rem;
+  text-shadow: 0 0.3rem 0.6rem black;
+  text-align: center;
+}
+
 @keyframes breathing {
   0%,
   50%,
@@ -227,10 +234,10 @@ button {
     transform: rotate(0deg) scale(1);
   }
   25% {
-    transform: rotate(-2deg) scale(1.02);
+    transform: rotate(-1deg) scale(1.02);
   }
   75% {
-    transform: rotate(2deg) scale(1.02);
+    transform: rotate(1deg) scale(1.02);
   }
 }
 

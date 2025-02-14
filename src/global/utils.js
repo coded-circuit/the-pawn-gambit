@@ -38,8 +38,9 @@ export const PieceCooldown = {
 export const PageName = {
   MAIN_MENU: 0,
   GAME: 1,
-  OPTIONS: 2,
-  CREDITS: 3,
+  HOW_TO_PLAY: 2,
+  OPTIONS: 3,
+  CREDITS: 4,
 };
 export const PieceMovementFunc = {
   [PieceType.PLAYER]: (pos, playerPos, occupied) => {

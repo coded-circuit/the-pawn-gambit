@@ -5,6 +5,8 @@ import "./App.module.scss";
 import { selectPage } from "./data/menuSlice";
 import { PageName, TRANSITION_HALF_LIFE, sleep } from "./global/utils";
 import { useEffect, useState } from "react";
+import HowToPlayMenu from "./pages/MainMenu/HowToPlayMenu";
+import OptionsMenu from "./pages/MainMenu/OptionsMenu";
 
 function App() {
   const currentPage = useSelector(selectPage);
@@ -29,10 +31,17 @@ function App() {
           await sleep(TRANSITION_HALF_LIFE);
           setTransitionElement();
           break;
+        case PageName.HOW_TO_PLAY:
+          setTransitionElement(<Transition />);
+          await sleep(TRANSITION_HALF_LIFE);
+          setPageElement(<HowToPlayMenu />);
+          await sleep(TRANSITION_HALF_LIFE);
+          setTransitionElement();
+          break;
         case PageName.OPTIONS:
           setTransitionElement(<Transition />);
           await sleep(TRANSITION_HALF_LIFE);
-          setPageElement(<Options />);
+          setPageElement(<OptionsMenu />);
           await sleep(TRANSITION_HALF_LIFE);
           setTransitionElement();
           break;
