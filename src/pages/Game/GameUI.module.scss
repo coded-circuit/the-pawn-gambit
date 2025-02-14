@@ -52,6 +52,7 @@
     width: 100%;
     height: 100%;
     border-radius: 3vmin;
+
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -75,7 +76,7 @@
 }
 
 .barFull {
-  animation: barFull 0.5s infinite;
+  @include theme.barFull;
 }
 
 .upperRight {
@@ -97,15 +98,5 @@
   }
   15% {
     transform: scale(1.3);
-  }
-}
-
-@keyframes barFull {
-  0%,
-  100% {
-    background-color: theme.$acc-clr-3;
-  }
-  50% {
-    background-color: white;
   }
 }

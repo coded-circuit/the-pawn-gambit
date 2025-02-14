@@ -1,5 +1,5 @@
 h1.heading {
-  margin-bottom: 2rem;
+  margin-bottom: -2rem;
   @include theme.breathing;
   @include theme.heading;
 }
@@ -9,16 +9,90 @@ p.instruction {
   font-size: 2rem;
   text-shadow: 0 0rem 0.6rem black;
   text-align: center;
-  padding-inline: 1rem;
+  padding-inline: 3rem;
 
   margin-top: 2em;
 }
 
 button.backButton {
   font-size: 2rem;
-  margin-top: 3rem;
+  margin-top: 4rem;
+}
+
+.wasdIcon {
+  width: 15rem;
+  height: auto;
+  margin-top: 1rem;
+}
+.barIcon {
+  background-color: theme.$acc-clr-2;
+  width: 20rem;
+  height: 3rem;
+  margin-top: 1.5rem;
+
+  border-radius: 3rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  div.cooldownBarBG {
+    background-color: theme.$cell-clr-1;
+    border-radius: 2vmin;
+    width: 92%;
+    height: 50%;
+    overflow: hidden;
+
+    div.cooldownBarFill {
+      background-color: theme.$acc-clr-3;
+      height: 100%;
+      animation: animateBarFill 5s infinite;
+      border-radius: 2vmin;
+    }
+  }
 }
 
 .howToPlayMenu {
   @include theme.mainMenuContainer;
+}
+
+@keyframes animateBarFill {
+  0%,
+  100% {
+    background-color: theme.$acc-clr-3;
+    width: 0%;
+  }
+
+  10%,
+  25% {
+    width: 33%;
+  }
+
+  35%,
+  50% {
+    width: 66%;
+  }
+
+  90% {
+    width: 0%;
+  }
+
+  62%,
+  66%,
+  70%,
+  74%,
+  78% {
+    background-color: white;
+    width: 100%;
+  }
+
+  60%,
+  64%,
+  68%,
+  72%,
+  76%,
+  80% {
+    background-color: theme.$acc-clr-3;
+  }
 }

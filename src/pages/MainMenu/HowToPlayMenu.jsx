@@ -3,6 +3,7 @@ import { switchPage } from "../../data/menuSlice";
 import { PageName, sleep, TRANSITION_HALF_LIFE } from "../../global/utils";
 import styles from "./HowToPlayMenu.module.scss";
 import { useDispatch } from "react-redux";
+import WasdIcon from "./WasdIcon";
 
 const HowToPlayMenu = () => {
   const [disabled, setDisabled] = useState(true);
@@ -37,10 +38,18 @@ const HowToPlayMenu = () => {
     <main className={styles.howToPlayMenu}>
       <div>
         <h1 className={styles.heading}>HOW TO PLAY</h1>
-        <p className={styles.instruction}>MOVE WITH WASD</p>
+        <p className={styles.instruction}>MOVE WITH WASD (OR BY SWIPING)</p>
+        <div className={styles.wasdIcon}>
+          <WasdIcon />
+        </div>
         <p className={styles.instruction}>
-          CAPTURE ENEMIES BY MOVING INTO THEM WHEN BAR IS FULL
+          CAPTURE ENEMIES BY MOVING INTO THEM WHEN THE BAR IS FULL
         </p>
+        <div className={styles.barIcon}>
+          <div className={styles.cooldownBarBG}>
+            <div className={styles.cooldownBarFill}></div>
+          </div>
+        </div>
         <button
           onMouseDown={(e) => e.preventDefault()}
           className={styles.backButton}

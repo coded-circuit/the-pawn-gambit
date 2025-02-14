@@ -1,7 +1,6 @@
 import { useSelector } from "react-redux";
 import { MainMenu, Game, Options, Credits } from "./pages/index";
 import { Transition } from "./components";
-import "./App.module.scss";
 import { selectPage } from "./data/menuSlice";
 import { PageName, TRANSITION_HALF_LIFE, sleep } from "./global/utils";
 import { useEffect, useState } from "react";
