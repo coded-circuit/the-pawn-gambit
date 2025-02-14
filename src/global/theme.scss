@@ -260,43 +260,42 @@ button {
 
 @media (max-width: 425px) {
   html {
-    font-size: 8px; /* Reduce base size */
+    font-size: 8px;
   }
 }
 
 @media (min-width: 425px) {
   html {
-    font-size: 10px; /* Reduce base size */
+    font-size: 10px;
   }
 }
 
-@media (min-width: 575px) {
-  html {
-    font-size: 10px; /* Reduce base size */
-  }
-}
+// @media (min-width: 575px) {
+//   html {
+//     font-size: 10px;
+//   }
+// }
 
 @media (min-width: 768px) {
   html {
-    font-size: 12px; /* Default size */
+    font-size: 11px;
   }
 }
 
 @media (min-width: 992px) {
   html {
-    font-size: 14px; /* Increase for readability */
+    font-size: 12px;
   }
 }
 
 @media (min-width: 1200px) {
   html {
-    font-size: 16px;
+    font-size: 13px;
   }
 }
 
 @media (min-width: 1900px) {
   html {
-    font-size: 20px;
+    font-size: 16px;
   }
 }
-

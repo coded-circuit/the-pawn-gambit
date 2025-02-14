@@ -3,7 +3,7 @@ import { useSwipeable } from "react-swipeable";
 import { sleep } from "../global/utils";
 const inputKeys = ["w", "a", "s", "d", " "];
 
-const createSwipeHandler = (setInput, inputStr) => {
+const createTouchInputCallback = (setInput, inputStr) => {
   return () => {
     (async () => {
       setInput(inputStr);
@@ -15,11 +15,12 @@ const createSwipeHandler = (setInput, inputStr) => {
 
 const useInputs = () => {
   const [input, setInput] = useState();
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: createSwipeHandler(setInput, "a"),
-    onSwipedRight: createSwipeHandler(setInput, "d"),
-    onSwipedUp: createSwipeHandler(setInput, "w"),
-    onSwipedDown: createSwipeHandler(setInput, "s"),
+  const touchHandlers = useSwipeable({
+    onSwipedLeft: createTouchInputCallback(setInput, "a"),
+    onSwipedRight: createTouchInputCallback(setInput, "d"),
+    onSwipedUp: createTouchInputCallback(setInput, "w"),
+    onSwipedDown: createTouchInputCallback(setInput, "s"),
+    onTap: createTouchInputCallback(setInput, " "),
     preventDefaultTouchmoveEvent: true,
     trackMouse: true,
   });
@@ -54,7 +55,7 @@ const useInputs = () => {
     };
   }, []);
 
-  return { input, swipeHandlers };
+  return { input, touchHandlers };
 };
 
 export default useInputs;

@@ -9,7 +9,7 @@ import Guide from "./GameUIComponents/Guide";
 import { resetState } from "../../data/gameSlice";
 
 const GameUI = ({
-  swipeHandlers,
+  touchHandlers,
   captureCooldownPercent,
   turnNumber,
   score,
@@ -35,7 +35,7 @@ const GameUI = ({
   }, [score]);
 
   return (
-    <div className={styles.hud} {...swipeHandlers}>
+    <div className={styles.hud}>
       <div className={styles.upperLeft}>
         <span className={styles.uiLabel}>SCORE:</span>
         <span className={scoreClass}>{score}</span>
@@ -82,6 +82,7 @@ const GameUI = ({
           </div>
         </div>
       </div>
+      <div className={styles.touchArea} {...touchHandlers} />
     </div>
   );
 };

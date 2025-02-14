@@ -38,18 +38,23 @@ const HowToPlayMenu = () => {
     <main className={styles.howToPlayMenu}>
       <div>
         <h1 className={styles.heading}>HOW TO PLAY</h1>
-        <p className={styles.instruction}>MOVE WITH WASD (OR BY SWIPING)</p>
         <div className={styles.wasdIcon}>
           <WasdIcon />
         </div>
         <p className={styles.instruction}>
-          CAPTURE ENEMIES BY MOVING INTO THEM WHEN THE BAR IS FULL
+          Move: WASD (or swipe)
+          <br />
+          Pass Turn: Space (or tap)
         </p>
+
         <div className={styles.barIcon}>
           <div className={styles.cooldownBarBG}>
             <div className={styles.cooldownBarFill}></div>
           </div>
         </div>
+        <p className={styles.instruction}>
+          Capture enemies by moving into them when the bar is full.
+        </p>
         <button
           onMouseDown={(e) => e.preventDefault()}
           className={styles.backButton}

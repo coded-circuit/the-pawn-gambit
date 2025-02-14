@@ -67,7 +67,7 @@ const Game = () => {
   //   currentInput:
   //       The actual main logic only executes when the current input updates.
 
-  const { input, swipeHandlers } = useInputs();
+  const { input, touchHandlers } = useInputs();
   const [currentInput, setCurrentInput] = useState("");
   const inputQueued = useRef("");
   const [isProcessingInput, setIsProcessingInput] = useState(false);
@@ -225,7 +225,7 @@ const Game = () => {
   return (
     <main>
       <GameUI
-        swipeHandlers={swipeHandlers}
+        touchHandlers={touchHandlers}
         turnNumber={turnNumber}
         score={score}
         captureCooldownPercent={

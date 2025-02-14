@@ -1,5 +1,5 @@
 h1.heading {
-  margin-bottom: -2rem;
+  margin-bottom: 5rem;
   @include theme.breathing;
   @include theme.heading;
 }
@@ -11,24 +11,25 @@ p.instruction {
   text-align: center;
   padding-inline: 3rem;
 
-  margin-top: 2em;
+  margin-bottom: 2.5em;
+  margin-top: 0.5em;
 }
 
 button.backButton {
   font-size: 2rem;
-  margin-top: 4rem;
+  margin-top: -2rem;
 }
 
 .wasdIcon {
-  width: 15rem;
+  margin-left: 1rem;
+  width: 20rem;
   height: auto;
-  margin-top: 1rem;
 }
+
 .barIcon {
   background-color: theme.$acc-clr-2;
   width: 20rem;
   height: 3rem;
-  margin-top: 1.5rem;
 
   border-radius: 3rem;
   overflow: hidden;
