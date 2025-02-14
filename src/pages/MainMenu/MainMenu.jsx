@@ -23,6 +23,7 @@ const MainMenu = () => {
           <span className={styles.subtitle}>PAWN's</span> GAMBIT
         </h1>
         <button
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => {
             if (hasClicked) return;
             dispatch(switchPage(PageName.GAME));
@@ -33,6 +34,18 @@ const MainMenu = () => {
           PLAY
         </button>
         <button
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => {
+            if (hasClicked) return;
+            dispatch(switchPage(PageName.OPTIONS));
+            setHasClicked(true);
+          }}
+          disabled={disabled}
+        >
+          HOW TO PLAY
+        </button>
+        <button
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => {
             if (hasClicked) return;
             dispatch(switchPage(PageName.OPTIONS));
@@ -43,6 +56,7 @@ const MainMenu = () => {
           OPTIONS
         </button>
         <button
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => {
             if (hasClicked) return;
             dispatch(switchPage(PageName.CREDITS));

@@ -48,7 +48,7 @@ const Game = () => {
     (async () => {
       dispatch(resetState());
       // await sleep(600);
-      dispatch(addPiece(0, 0, PieceType.PAWN_E));
+      // dispatch(addPiece(0, 0, PieceType.PAWN_E));
       // dispatch(addPiece(3, 0, PieceType.PAWN_S));
       // dispatch(addPiece(1, 1, PieceType.KNIGHT));
       // dispatch(addPiece(1, 4, PieceType.QUEEN));
@@ -73,7 +73,10 @@ const Game = () => {
   const [isProcessingInput, setIsProcessingInput] = useState(false);
 
   useEffect(() => {
-    if (gameIsOver) return;
+    if (gameIsOver) {
+      setIsProcessingInput(false);
+      return;
+    }
     if (input === "" || input === undefined) return;
     if (isProcessingInput) {
       inputQueued.current = input;
@@ -88,7 +91,12 @@ const Game = () => {
   }, [input]);
 
   useEffect(() => {
-    if (gameIsOver) return;
+    if (gameIsOver) {
+      if (isProcessingInput) {
+        setIsProcessingInput(false);
+      }
+      return;
+    }
     if (isProcessingInput === false) {
       if (inputQueued.current !== "") {
         setIsProcessingInput(true);
@@ -99,7 +107,11 @@ const Game = () => {
   }, [isProcessingInput]);
 
   useEffect(() => {
-    if (gameIsOver) return;
+    if (gameIsOver) {
+      setIsProcessingInput(false);
+      setCurrentInput("");
+      return;
+    }
     if (currentInput === "") {
       return;
     }
@@ -153,10 +165,11 @@ const Game = () => {
       dispatch(processPieces());
       await sleep(200);
 
-      if (store.getState().game.gameIsOver) return; // Get directly from store to have updated data
-      const numberToSpawn = getNumberToSpawn(difficulty);
-      console.log(numberToSpawn);
-      for (let i = 0; i < numberToSpawn; i++) {
+      if (store.getState().game.gameIsOver) {
+        setIsProcessingInput(false);
+        return; // Get directly from store to have updated data
+      }
+      for (let i = 0; i < getNumberToSpawn(difficulty); i++) {
         const { type, pos } = getPieceWithPos(difficulty);
 
         // Get directly from store to have updated data

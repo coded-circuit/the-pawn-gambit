@@ -14,7 +14,7 @@ function App() {
   // Handle Page Transition
   useEffect(() => {
     (async () => {
-      switch (currentPage) {
+      switch (currentPage.value) {
         case PageName.MAIN_MENU:
           setTransitionElement(<Transition />);
           await sleep(TRANSITION_HALF_LIFE);

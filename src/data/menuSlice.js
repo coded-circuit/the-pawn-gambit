@@ -10,7 +10,10 @@ if (localStorage.getItem("showIndicators") === null) {
 }
 
 const initialState = {
-  page: PageName.MAIN_MENU,
+  page: {
+    value: PageName.MAIN_MENU,
+    updateValue: 0,
+  },
   settings: {
     difficulty: JSON.parse(localStorage.getItem("difficulty")),
     showIndicators: JSON.parse(localStorage.getItem("showIndicators")),
@@ -24,7 +27,12 @@ const menuSlice = createSlice({
     switchPage: {
       reducer(state, action) {
         const { newPage } = action.payload;
-        state.page = newPage;
+        if (state.page.value === newPage) {
+          state.page.updateValue += 1;
+        } else {
+          state.page.value = newPage;
+          state.page.updateValue = 0;
+        }
       },
       prepare(newPage) {
         return {

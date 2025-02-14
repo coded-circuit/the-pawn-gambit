@@ -51,6 +51,7 @@ const OptionsMenu = () => {
         <h1 className={styles.heading}>OPTIONS</h1>
         <p className={styles.optionLabel}>DIFFICULTY</p>
         <button
+          onMouseDown={(e) => e.preventDefault()}
           className={styles.optionButton}
           onClick={() => {
             if (isExiting) return;
@@ -66,6 +67,7 @@ const OptionsMenu = () => {
         </button>
         <p className={styles.optionLabel}>SHOW INDICATORS</p>
         <button
+          onMouseDown={(e) => e.preventDefault()}
           className={styles.optionButton}
           onClick={() => {
             if (isExiting) return;
@@ -76,6 +78,7 @@ const OptionsMenu = () => {
           {showIndicatorsStr}
         </button>
         <button
+          onMouseDown={(e) => e.preventDefault()}
           className={styles.backButton}
           onClick={() => {
             if (isExiting) return;

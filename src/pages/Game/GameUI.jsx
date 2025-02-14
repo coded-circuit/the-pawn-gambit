@@ -1,11 +1,12 @@
 import { useDispatch } from "react-redux";
-import { PageName, sleep } from "../../global/utils";
+import { PageName, sleep, TRANSITION_HALF_LIFE } from "../../global/utils";
 import { switchPage } from "../../data/menuSlice";
 import styles from "./GameUI.module.scss";
 import { useEffect, useState } from "react";
 import Quit from "./GameUIComponents/Quit";
 import Reset from "./GameUIComponents/Reset";
 import Guide from "./GameUIComponents/Guide";
+import { resetState } from "../../data/gameSlice";
 
 const GameUI = ({ captureCooldownPercent, turnNumber, score }) => {
   const dispatch = useDispatch();
@@ -37,15 +38,24 @@ const GameUI = ({ captureCooldownPercent, turnNumber, score }) => {
         <span className={turnNumberClass}>{turnNumber}</span>
       </div>
       <div className={styles.upperRight}>
-        {/* <button className={styles.uiButton}>
-          <Guide />
-        </button> */}
-        <button className={styles.uiButton} onClick={() => {}}>
+        <button
+          className={styles.uiButton}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => {
+            (async () => {
+              dispatch(switchPage(PageName.GAME));
+              await sleep(TRANSITION_HALF_LIFE);
+              dispatch(resetState());
+            })();
+          }}
+        >
           <Reset />
         </button>
         <button
           className={styles.uiButton}
-          onClick={() => {
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={(e) => {
+            e.target.blur();
             dispatch(switchPage(PageName.MAIN_MENU));
           }}
         >
