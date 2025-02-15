@@ -160,11 +160,15 @@ const Game = () => {
     }
 
     (async () => {
+      // Move player
       dispatch(movePlayer(direction.x, direction.y, isCapturing, difficulty));
       await sleep(100);
+
+      // Check if player is captured, move pieces, update cooldowns
       dispatch(processPieces());
       await sleep(200);
 
+      // Spawn new pieces
       if (store.getState().game.gameIsOver) {
         setIsProcessingInput(false);
         return; // Get directly from store to have updated data
@@ -178,6 +182,7 @@ const Game = () => {
         }
       }
       await sleep(100);
+
       setIsProcessingInput(false);
     })();
   }, [currentInput]);
