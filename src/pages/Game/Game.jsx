@@ -18,6 +18,7 @@ import {
   selectTurnNumber,
   selectScore,
   selectGameIsOver,
+  updateCaptureTiles,
 } from "../../data/gameSlice";
 import {
   getPieceWithPos,
@@ -167,21 +168,26 @@ const Game = () => {
       // Check if player is captured, move pieces, update cooldowns
       dispatch(processPieces());
       await sleep(200);
+      dispatch(updateCaptureTiles());
 
       // Spawn new pieces
+      // Get directly from store
       if (store.getState().game.gameIsOver) {
         setIsProcessingInput(false);
-        return; // Get directly from store to have updated data
+        return;
       }
       for (let i = 0; i < getNumberToSpawn(difficulty); i++) {
         const { type, pos } = getPieceWithPos(difficulty);
 
-        // Get directly from store to have updated data
+        // Get directly from store
         if (store.getState().game.occupiedCellsMatrix[pos.y][pos.x] === false) {
           dispatch(addPiece(pos.x, pos.y, type));
         }
       }
-      await sleep(100);
+      await sleep(50);
+
+      // Update capture tiles again in case new pieces were blocking
+      dispatch(updateCaptureTiles());
 
       setIsProcessingInput(false);
     })();

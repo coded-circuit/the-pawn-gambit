@@ -365,6 +365,7 @@ const pieceProbabilities = {
     0.0625,
     0.0625,
   ],
+  // [Difficulty.HARD]: [null, 0.5, 0.5, 0, 0, 0, 0, 0, 0],
 };
 Object.freeze(survivalTurnMilestones);
 Object.freeze(difficultyMultiplier);

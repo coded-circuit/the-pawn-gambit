@@ -271,6 +271,12 @@ const gameSlice = createSlice({
             }
           }
         });
+      },
+    },
+
+    updateCaptureTiles: {
+      reducer(state) {
+        const currPlayerPos = state.player.position;
 
         // loop over all the NEW moving pieces and update capture cells
         state.captureCells = [];
@@ -286,7 +292,7 @@ const gameSlice = createSlice({
         });
       },
     },
-
+    
     // end of reducers
   },
 });
@@ -306,8 +312,13 @@ export const selectScore = (state) => state.game.score;
 export const selectGameIsOver = (state) => state.game.gameIsOver;
 
 // ACTION EXPORTS --------------------------------------
-export const { resetState, movePlayer, addPiece, processPieces } =
-  gameSlice.actions;
+export const {
+  resetState,
+  movePlayer,
+  addPiece,
+  processPieces,
+  updateCaptureTiles,
+} = gameSlice.actions;
 export default gameSlice.reducer;
 
 //-------------------------------------- PRIVATE FUNCTIONS --------------------------------------
