@@ -1,19 +1,26 @@
 import { createSlice, nanoid } from "@reduxjs/toolkit";
+
 import {
-  assert,
   PieceType,
+  assert,
+  assertIsVector,
   getDistance,
   getVectorSum,
-  PieceCooldown,
-  assertIsVector,
-  PieceCaptureFunc,
   arrayHasVector,
+} from "../global/utils";
+
+import {
+  PieceCooldown,
   PieceMovementFunc,
-  getPassiveScoreIncrease,
-  getPieceCaptureScoreIncrease,
+  PieceCaptureFunc,
   PawnTypes,
   OfficerTypes,
-} from "../global/utils";
+} from "../features/game/logic/piece";
+
+import {
+  getPassiveScoreIncrease,
+  getPieceCaptureScoreIncrease,
+} from "../features/game/logic/score";
 
 export const playerCaptureCooldown = 6;
 const playerSpawnPos = { x: 3, y: 4 };
@@ -292,14 +299,12 @@ const gameSlice = createSlice({
         });
       },
     },
-    
+
     // end of reducers
   },
 });
 
 // SELECT FUNCTIONS --------------------------------------
-export const selectPieceById = (pieceId) => (state) =>
-  state.game.pieces[pieceId];
 export const selectAllPieces = (state) => state.game.pieces;
 export const selectOccupiedCellsMatrix = (state) =>
   state.game.occupiedCellsMatrix;

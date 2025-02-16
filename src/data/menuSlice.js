@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { assert, Difficulty, PageName } from "../global/utils";
+import { Difficulty, PageName, assert } from "../global/utils";
 
 if (localStorage.getItem("difficulty") === null) {
   localStorage.setItem("difficulty", JSON.stringify(Number(Difficulty.EASY)));

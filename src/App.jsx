@@ -1,11 +1,13 @@
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { MainMenu, Game, Options, Credits } from "./pages/index";
-import { Transition } from "./components";
 import { selectPage } from "./data/menuSlice";
 import { PageName, TRANSITION_HALF_LIFE, sleep } from "./global/utils";
-import { useEffect, useState } from "react";
-import HowToPlayMenu from "./pages/MainMenu/HowToPlayMenu";
-import OptionsMenu from "./pages/MainMenu/OptionsMenu";
+
+import MainPage from "./features/menu/MainPage";
+import OptionsPage from "./features/menu/OptionsPage";
+import HowToPlayPage from "./features/menu/HowToPlayPage";
+import PageTransition from "./features/menu/PageTransition";
+import GamePage from "./features/game/GamePage";
 
 function App() {
   const currentPage = useSelector(selectPage);
@@ -16,36 +18,36 @@ function App() {
   useEffect(() => {
     (async () => {
       switch (currentPage.value) {
-        case PageName.MAIN_MENU:
-          setTransitionElement(<Transition />);
-          await sleep(TRANSITION_HALF_LIFE);
-          setPageElement(<MainMenu />);
-          await sleep(TRANSITION_HALF_LIFE);
-          setTransitionElement();
-          break;
         case PageName.GAME:
-          setTransitionElement(<Transition />);
+          setTransitionElement(<PageTransition />);
           await sleep(TRANSITION_HALF_LIFE);
-          setPageElement(<Game />);
+          setPageElement(<GamePage />);
           await sleep(TRANSITION_HALF_LIFE);
           setTransitionElement();
           break;
-        case PageName.HOW_TO_PLAY:
-          setTransitionElement(<Transition />);
+        case PageName.MAIN_MENU:
+          setTransitionElement(<PageTransition />);
           await sleep(TRANSITION_HALF_LIFE);
-          setPageElement(<HowToPlayMenu />);
+          setPageElement(<MainPage />);
           await sleep(TRANSITION_HALF_LIFE);
           setTransitionElement();
           break;
         case PageName.OPTIONS:
-          setTransitionElement(<Transition />);
+          setTransitionElement(<PageTransition />);
           await sleep(TRANSITION_HALF_LIFE);
-          setPageElement(<OptionsMenu />);
+          setPageElement(<OptionsPage />);
+          await sleep(TRANSITION_HALF_LIFE);
+          setTransitionElement();
+          break;
+        case PageName.HOW_TO_PLAY:
+          setTransitionElement(<PageTransition />);
+          await sleep(TRANSITION_HALF_LIFE);
+          setPageElement(<HowToPlayPage />);
           await sleep(TRANSITION_HALF_LIFE);
           setTransitionElement();
           break;
         case PageName.CREDITS:
-          setTransitionElement(<Transition />);
+          setTransitionElement(<PageTransition />);
           await sleep(TRANSITION_HALF_LIFE);
           setPageElement(<Credits />);
           await sleep(TRANSITION_HALF_LIFE);
