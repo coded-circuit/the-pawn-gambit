@@ -58,6 +58,13 @@ export function arrayHasVector(array, vector) {
   );
 }
 
+export function removeVectorInArray(array, vector) {
+  assertIsVector(vector);
+  return array.filter((item) => {
+    return item.x !== vector.x || item.y !== vector.y;
+  });
+}
+
 // ------------------------------------ DEBUGGING UTILITIES ------------------------------------
 export function assert(condition, message) {
   if (!condition) {
@@ -77,6 +84,13 @@ export function assertIsValidNonPlayerPiece(pieceType) {
     pieceType > 0 && pieceType < Object.keys(PieceType).length,
     `Non-player piece type assertion failed: ${pieceType}`
   );
+}
+
+export function assertIsValidPlayerMovement(v1, v2) {
+  assertIsVector(v1);
+  assertIsVector(v2);
+  const dist = getDistance(v1, v2);
+  assert(dist === 1, `Invalid player movement! (${dist})`);
 }
 
 // ------------------------------------ TIMING UTILITIES ------------------------------------

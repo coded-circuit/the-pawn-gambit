@@ -65,25 +65,4 @@ function App() {
   );
 }
 
-// function App() {
-//   const currentPage = useSelector(selectPage);
-//   const dispatch = useDispatch();
-//   let pageElement;
-
-//   switch (currentPage) {
-//     case PageName.MAIN_MENU:
-//       console.log("switched to MAIN MENU, currentPage", currentPage);
-//       pageElement = <MainMenu />;
-//       console.log(pageElement);
-//       break;
-//     case PageName.GAME:
-//       console.log("switched to GAME, currentPage", currentPage);
-//       pageElement = <Game />;
-//       console.log(pageElement);
-//       break;
-//   }
-
-//   return pageElement;
-// }
-
 export default App;

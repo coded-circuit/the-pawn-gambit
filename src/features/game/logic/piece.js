@@ -3,6 +3,7 @@ import {
   assert,
   assertIsVector,
   arrayHasVector,
+  removeVectorInArray,
 } from "../../../global/utils";
 
 import { isValidCell } from "./grid";
@@ -230,11 +231,4 @@ function getCaptureCellsByDirection(piecePos, dirX, dirY, playerPos, obs) {
     currCell.y += dirY;
   }
   return output;
-}
-
-function removeVectorInArray(array, vector) {
-  assertIsVector(vector);
-  return array.filter((item) => {
-    return item.x !== vector.x || item.y !== vector.y;
-  });
 }

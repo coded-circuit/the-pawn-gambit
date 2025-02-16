@@ -4,9 +4,9 @@ import {
   PieceType,
   assert,
   assertIsVector,
-  getDistance,
   getVectorSum,
   arrayHasVector,
+  assertIsValidPlayerMovement,
 } from "../global/utils";
 
 import {
@@ -25,7 +25,7 @@ import {
 export const playerCaptureCooldown = 6;
 const playerSpawnPos = { x: 3, y: 4 };
 const initialState = {
-  // pieceId: { position, type, cooldown }
+  // { pieceId: { position, type, cooldown }, }
   pieces: {},
 
   player: {
@@ -34,16 +34,16 @@ const initialState = {
     captureCooldownLeft: playerCaptureCooldown,
   },
 
-  // pieceId: { x, y }
+  // { pieceId: { x, y }, }
   movingPieces: {},
 
-  // []{ x, y }, Can have duplicates
+  // [ { x, y }, ]  Can have duplicates
   captureCells: [],
 
-  // 2d matrix, either false or a pieceId
+  // [ [false, pieceId, ...], ] 2d matrix, either false or a pieceId
   occupiedCellsMatrix: new Array(8).fill().map(() => new Array(8).fill(false)),
 
-  // []pieceId
+  // [ pieceId, ]
   queuedForDeletion: [],
 
   turnNumber: 0,
@@ -104,7 +104,7 @@ const gameSlice = createSlice({
           state.player.captureCooldownLeft = playerCaptureCooldown;
         }
 
-        verifyPlayerMovement(currPosition, newPosition); // Basically an assert
+        assertIsValidPlayerMovement(currPosition, newPosition);
 
         // Since player doesn't have a piece id, set it as "ThePlayer"
         moveOccupiedCell(state, currPosition, newPosition, "ThePlayer");
@@ -299,8 +299,6 @@ const gameSlice = createSlice({
         });
       },
     },
-
-    // end of reducers
   },
 });
 
@@ -326,14 +324,7 @@ export const {
 } = gameSlice.actions;
 export default gameSlice.reducer;
 
-//-------------------------------------- PRIVATE FUNCTIONS --------------------------------------
-function verifyPlayerMovement(v1, v2) {
-  assertIsVector(v1);
-  assertIsVector(v2);
-  const dist = getDistance(v1, v2);
-  assert(dist === 1, `Invalid player movement! (${dist})`);
-}
-
+// -------------------------------------- PRIVATE FUNCTIONS --------------------------------------
 function moveOccupiedCell(state, v1, v2, pieceId) {
   assertIsVector(v1);
   assertIsVector(v2);

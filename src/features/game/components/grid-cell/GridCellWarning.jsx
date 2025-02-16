@@ -1,6 +1,6 @@
 import styles from "./GridCellWarning.module.scss";
 
-const GridCellWarning = ({ show }) => {
+const GridCellWarning = () => {
   return (
     <svg
       className={styles.gridCellWarning}
