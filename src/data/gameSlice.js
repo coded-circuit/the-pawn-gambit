@@ -48,7 +48,7 @@ const initialState = {
 
   turnNumber: 0,
   score: 0,
-  gameIsOver: false,
+  isGameOver: false,
 };
 initialState.occupiedCellsMatrix[playerSpawnPos.y][playerSpawnPos.x] =
   "ThePlayer";
@@ -209,7 +209,7 @@ const gameSlice = createSlice({
           Object.keys(state.pieces).forEach((pieceId) => {
             state.pieces[pieceId].cooldown = 99;
           });
-          state.gameIsOver = true;
+          state.isGameOver = true;
           return state;
         }
 
@@ -314,7 +314,7 @@ export const selectPlayerCaptureCooldown = (state) =>
   state.game.player.captureCooldownLeft;
 export const selectTurnNumber = (state) => state.game.turnNumber;
 export const selectScore = (state) => state.game.score;
-export const selectGameIsOver = (state) => state.game.gameIsOver;
+export const selectIsGameOver = (state) => state.game.isGameOver;
 
 // ACTION EXPORTS --------------------------------------
 export const {

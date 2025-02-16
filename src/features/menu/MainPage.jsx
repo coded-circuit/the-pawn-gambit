@@ -58,7 +58,7 @@ const MainPage = () => {
         >
           OPTIONS
         </button>
-        <button
+        {/* <button
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => {
             if (hasClicked) return;
@@ -68,7 +68,7 @@ const MainPage = () => {
           disabled={disabled}
         >
           CREDITS
-        </button>
+        </button> */}
       </div>
     </main>
   );

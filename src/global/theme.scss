@@ -44,7 +44,7 @@ $grid-scale: 65vmin;
     auto;
 }
 
-// -------------------------------------------- MIXINS --------------------------------------------
+// ------------------------------------------------- MIXINS --------------------------------------------------
 @mixin checkered {
   background-color: $acc-clr-1;
   background-image: linear-gradient(
@@ -201,7 +201,7 @@ button {
   }
 }
 
-// -------------------------------------------- KEYFRAMES --------------------------------------------
+// ------------------------------------------------ KEYFRAMES ------------------------------------------------
 @keyframes stripeMovement {
   0% {
     background-position: 0;
@@ -249,10 +249,10 @@ button {
     transform: rotate(0deg) scale(1);
   }
   25% {
-    transform: rotate(-1deg) scale(1.02);
+    transform: rotate(-1.5deg) scale(1.02);
   }
   75% {
-    transform: rotate(1deg) scale(1.02);
+    transform: rotate(1.5deg) scale(1.02);
   }
 }
 
@@ -266,16 +266,28 @@ button {
   }
 }
 
-// -------------------------------------------- MEDIA QUERIES --------------------------------------------
+// ---------------------------------------------- MEDIA QUERIES ----------------------------------------------
 @media (max-width: 425px) {
   html {
     font-size: 8px;
   }
 }
 
+@media (max-width: 425px) and (orientation: landscape) {
+  html {
+    font-size: 5px;
+  }
+}
+
 @media (min-width: 425px) {
   html {
     font-size: 10px;
+  }
+}
+
+@media (min-width: 425px) and (orientation: landscape) {
+  html {
+    font-size: 7px;
   }
 }
 

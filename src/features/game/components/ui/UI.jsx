@@ -18,6 +18,7 @@ const GameUI = ({
   captureCooldownPercent,
   turnNumber,
   score,
+  isGameOver
 }) => {
   const dispatch = useDispatch();
   const [turnNumberClass, setTurnNumberClass] = useState(styles.uiVariable);
@@ -41,6 +42,11 @@ const GameUI = ({
 
   return (
     <div className={styles.hud}>
+      <div className={isGameOver ? styles.gameOver : styles.notGameOver}>
+        <span className={styles.gameOverText}>GAME OVER</span>
+        <span className={styles.scoreText}>{score}</span>
+        <span className={styles.subtitleText}>You survived {turnNumber} {turnNumber === 1 ? "turn!" : "turns!"}</span>
+      </div>
       <div className={styles.upperLeft}>
         <span className={styles.uiLabel}>SCORE:</span>
         <span className={scoreClass}>{score}</span>
@@ -71,9 +77,6 @@ const GameUI = ({
         >
           <QuitSvg />
         </button>
-      </div>
-      <div className={styles.lowerLeft}>
-        <div className={styles.uiAttackIndicator}>A</div>
       </div>
       <div className={styles.upperCenter}>
         <div className={styles.cooldownBar}>

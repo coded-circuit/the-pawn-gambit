@@ -18,7 +18,7 @@ import {
   selectPlayerCaptureCooldown,
   selectTurnNumber,
   selectScore,
-  selectGameIsOver,
+  selectIsGameOver,
 } from "../../data/gameSlice";
 
 import { PieceType, getVectorSum, sleep } from "../../global/utils";
@@ -38,7 +38,7 @@ const GamePage = () => {
   const playerCooldownLeft = useSelector(selectPlayerCaptureCooldown);
   const turnNumber = useSelector(selectTurnNumber);
   const score = useSelector(selectScore);
-  const gameIsOver = useSelector(selectGameIsOver);
+  const isGameOver = useSelector(selectIsGameOver);
   const difficulty = useSelector(selectDifficulty);
 
   // Initialize game
@@ -71,7 +71,7 @@ const GamePage = () => {
   const [isProcessingInput, setIsProcessingInput] = useState(false);
 
   useEffect(() => {
-    if (gameIsOver) {
+    if (isGameOver) {
       setIsProcessingInput(false);
       return;
     }
@@ -89,7 +89,7 @@ const GamePage = () => {
   }, [input]);
 
   useEffect(() => {
-    if (gameIsOver) {
+    if (isGameOver) {
       if (isProcessingInput) {
         setIsProcessingInput(false);
       }
@@ -105,7 +105,7 @@ const GamePage = () => {
   }, [isProcessingInput]);
 
   useEffect(() => {
-    if (gameIsOver) {
+    if (isGameOver) {
       setIsProcessingInput(false);
       setCurrentInput("");
       return;
@@ -164,12 +164,12 @@ const GamePage = () => {
 
       // Check if player is captured, move pieces, update cooldowns
       dispatch(processPieces());
-      await sleep(200);
       dispatch(updateCaptureTiles());
+      await sleep(200);
 
       // Spawn new pieces
       // Get directly from store
-      if (store.getState().game.gameIsOver) {
+      if (store.getState().game.isGameOver) {
         setIsProcessingInput(false);
         return;
       }
@@ -181,7 +181,7 @@ const GamePage = () => {
           dispatch(addPiece(pos.x, pos.y, type));
         }
       }
-      await sleep(50);
+      await sleep(5);
 
       // Update capture tiles again in case new pieces were blocking
       dispatch(updateCaptureTiles());
@@ -239,6 +239,7 @@ const GamePage = () => {
         captureCooldownPercent={
           (1 - playerCooldownLeft / playerCaptureCooldown) * 100
         }
+        isGameOver={isGameOver}
       />
       <div className={styles.graphicsGridBorder}></div>
       <div className={styles.graphicsGridTrunk}></div>
@@ -248,7 +249,7 @@ const GamePage = () => {
         <Piece
           gridPos={playerPosition}
           type={PieceType.PLAYER}
-          isCaptured={gameIsOver}
+          isCaptured={isGameOver}
         />
         {pieceComponents}
       </div>

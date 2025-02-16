@@ -1,18 +1,64 @@
+$gameOverHeight: 20rem;
+
 .hud {
   width: 100vw;
   height: 100vh;
   position: absolute;
   z-index: theme.$z-ind-game-ui;
 }
+
 .touchArea {
   width: 100%;
   height: 100%;
 }
 
+.gameOver {
+  width: 100vw;
+  height: $gameOverHeight;
+  position: absolute;
+  top: calc((100vh - $gameOverHeight) / 2);
+  z-index: 2;
+  background-color: rgba(0, 0, 0, 0.5);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  text-align: center;
+  word-spacing: -0.2rem;
+  text-shadow: 0 0 0.5rem black;
+
+  animation: slideUp 2s cubic-bezier(0.25, 1, 0.5, 1);
+
+  span.gameOverText {
+    // color: theme.$acc-clr-3;
+    color: theme.$light-clr-1;
+    margin-bottom: -0.3rem;
+    margin-top: -1rem;
+    font-size: 3rem;
+  }
+  span.scoreText {
+    // color: theme.$light-clr-1;
+    color: theme.$acc-clr-3;
+    margin-bottom: 0.5rem;
+    font-size: 6rem;
+    @include theme.breathing;
+  }
+  span.subtitleText {
+    // color: theme.$acc-clr-3;
+    color: theme.$light-clr-1;
+    font-size: 1.8rem;
+  }
+}
+
+.notGameOver {
+  display: none;
+}
+
 .upperLeft,
 .upperRight,
-.upperCenter,
-.lowerLeft {
+.upperCenter {
   width: auto;
   position: absolute;
   padding: 1.2rem;
@@ -39,8 +85,11 @@
   }
 }
 
-.puff {
-  animation: puff 0.2s;
+.upperRight {
+  right: 0;
+  top: 0;
+  display: flex;
+  flex-direction: row;
 }
 
 .upperCenter {
@@ -80,20 +129,12 @@
   }
 }
 
+.puff {
+  animation: puff 0.2s;
+}
+
 .barFull {
   @include theme.barFull;
-}
-
-.upperRight {
-  right: 0;
-  top: 0;
-  display: flex;
-  flex-direction: row;
-}
-
-.lowerLeft {
-  left: 0;
-  bottom: 0;
 }
 
 @keyframes puff {
@@ -103,5 +144,15 @@
   }
   15% {
     transform: scale(1.3);
+  }
+}
+
+@keyframes slideUp {
+  0%, 40% {
+    top: -$gameOverHeight;
+  }
+
+  100% {
+    top: calc((100vh - $gameOverHeight) / 2);
   }
 }

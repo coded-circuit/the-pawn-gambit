@@ -8,6 +8,9 @@ h1.logo {
 
   @include theme.breathing;
 
+  @media (max-width: 425px) {
+    width: 120%;
+  }
   @media (min-width: 992px) {
     width: 80%;
   }
