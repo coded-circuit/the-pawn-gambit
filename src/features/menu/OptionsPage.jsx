@@ -27,13 +27,13 @@ const OptionsPage = () => {
   let difficultyStr = "";
   switch (currDifficulty) {
     case Difficulty.EASY:
-      difficultyStr = "EASY";
+      difficultyStr = "CASUAL";
       break;
     case Difficulty.NORMAL:
-      difficultyStr = "NORMAL";
+      difficultyStr = "HARD";
       break;
     case Difficulty.HARD:
-      difficultyStr = "HARD";
+      difficultyStr = "BRUTAL";
       break;
   }
   const showIndicatorsStr = currShowIndicators ? "ON" : "OFF";
