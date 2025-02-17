@@ -78,4 +78,6 @@
 <p>Let's get in touch: <a href="mailto:gabriel.edradan05@gmail.com">gabriel.edradan05@gmail.com</a>.
 
 <br>
+<br>
+<br>
 <img src="public/readme/checkered-divider.png" alt="Divider" width="100%" align="center">
