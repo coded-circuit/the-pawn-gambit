@@ -32,6 +32,8 @@ const initialState = {
     position: { ...playerSpawnPos },
     type: PieceType.PLAYER,
     captureCooldownLeft: playerCaptureCooldown,
+    cooldownMax: playerCaptureCooldown,
+    level: 1,
   },
 
   // { pieceId: { x, y }, }
@@ -101,7 +103,7 @@ const gameSlice = createSlice({
           queueDelete(state, capturedPieceId);
 
           // Reset player capture cooldown
-          state.player.captureCooldownLeft = playerCaptureCooldown;
+          state.player.captureCooldownLeft = state.player.cooldownMax;
         }
 
         assertIsValidPlayerMovement(currPosition, newPosition);
@@ -299,6 +301,19 @@ const gameSlice = createSlice({
         });
       },
     },
+
+    upgradePlayer: {
+      reducer(state) {
+        // Reduce cooldown max to a minimum of 2, and increment level
+        const minCooldown = 2;
+        if (state.player.cooldownMax > minCooldown) {
+          state.player.cooldownMax -= 1;
+          // Reset current cooldown to new max for immediate feedback
+          state.player.captureCooldownLeft = state.player.cooldownMax;
+          state.player.level += 1;
+        }
+      },
+    },
   },
 });
 
@@ -310,6 +325,8 @@ export const selectCaptureCells = (state) => state.game.captureCells;
 export const selectPlayerPosition = (state) => state.game.player.position;
 export const selectPlayerCaptureCooldown = (state) =>
   state.game.player.captureCooldownLeft;
+export const selectPlayerCooldownMax = (state) => state.game.player.cooldownMax;
+export const selectPlayerLevel = (state) => state.game.player.level;
 export const selectTurnNumber = (state) => state.game.turnNumber;
 export const selectScore = (state) => state.game.score;
 export const selectIsGameOver = (state) => state.game.isGameOver;
@@ -321,6 +338,7 @@ export const {
   addPiece,
   processPieces,
   updateCaptureTiles,
+  upgradePlayer,
 } = gameSlice.actions;
 export default gameSlice.reducer;
 

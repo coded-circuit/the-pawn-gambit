@@ -83,6 +83,39 @@ $gameOverHeight: 20rem;
     margin-bottom: -0.5rem;
     font-size: 2rem;
   }
+
+  .upgradeRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.8rem;
+    margin-top: 0.6rem;
+  }
+
+  .upgradeButton {
+    background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.06) 100%);
+    border: 2px solid rgba(255,255,255,0.25);
+    color: theme.$light-clr-1;
+    font-size: 1.4rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.6rem;
+    text-shadow: none;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .upgradeInfo {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+    span {
+      font-size: 1.2rem;
+      color: theme.$dark-clr-1;
+    }
+  }
 }
 
 .upperRight {

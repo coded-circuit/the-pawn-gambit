@@ -19,6 +19,7 @@ import {
   selectTurnNumber,
   selectScore,
   selectIsGameOver,
+  selectPlayerCooldownMax,
 } from "../../data/gameSlice";
 
 import { PieceType, getVectorSum, sleep } from "../../global/utils";
@@ -36,6 +37,7 @@ const GamePage = () => {
   const captureCells = useSelector(selectCaptureCells);
   const playerPosition = useSelector(selectPlayerPosition);
   const playerCooldownLeft = useSelector(selectPlayerCaptureCooldown);
+  const playerCooldownMax = useSelector(selectPlayerCooldownMax);
   const turnNumber = useSelector(selectTurnNumber);
   const score = useSelector(selectScore);
   const isGameOver = useSelector(selectIsGameOver);
@@ -228,7 +230,7 @@ const GamePage = () => {
         turnNumber={turnNumber}
         score={score}
         captureCooldownPercent={
-          (1 - playerCooldownLeft / playerCaptureCooldown) * 100
+          (1 - playerCooldownLeft / playerCooldownMax) * 100
         }
         isGameOver={isGameOver}
       />
