@@ -91,6 +91,12 @@ const GamePage = () => {
   // Unified game turn logic
   const handleCellClick = (pos) => {
     // Prevent moves if the game is over
+    console.log("[handleCellClick] click on", pos, {
+      isGameOver,
+      playerPosition,
+      playerPieceType,
+      potentialMoves,
+    });
     if (isGameOver) return;
 
     if (arrayHasVector(potentialMoves, pos)) {
@@ -103,6 +109,11 @@ const GamePage = () => {
 
       (async () => {
         // --- Core Game Loop ---
+        console.log("[handleCellClick] dispatch movePlayer", {
+          pos,
+          isCapturing,
+          difficulty,
+        });
         dispatch(movePlayer(pos, isCapturing, difficulty));
         await sleep(100);
         dispatch(processPieces());

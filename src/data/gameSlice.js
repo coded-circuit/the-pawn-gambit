@@ -158,16 +158,31 @@ const gameSlice = createSlice({
     movePlayer: {
       reducer(state, action) {
         const { targetPos, isCapturing, difficulty } = action.payload;
-        console.log("[movePlayer] Reducer called with target:", targetPos);
-        // Use the PieceMovementFunc to get all valid moves for the current piece
+        console.log("[movePlayer] Reducer called with target:", targetPos, {
+          isCapturing,
+          pieceType: state.playerPieceType,
+        });
+        // Compute valid movement and capture cells for the current player piece
+        const occupied = extractOccupiedCells(state.occupiedCellsMatrix);
         const validMoves = PieceMovementFunc[state.playerPieceType](
           state.player.position,
           state.player.position,
-          extractOccupiedCells(state.occupiedCellsMatrix)
+          occupied
         );
-        // Check if the target position is a valid move
-        if (!arrayHasVector(validMoves, targetPos)) {
-          console.error("[movePlayer] Move rejected! Target not in valid moves:", validMoves);
+        const validCaptures = PieceCaptureFunc[state.playerPieceType](
+          state.player.position,
+          state.player.position,
+          occupied
+        );
+        const isValidNonCaptureMove = arrayHasVector(validMoves, targetPos) && !isCapturing;
+        const isValidCaptureMove = arrayHasVector(validCaptures, targetPos) && isCapturing;
+        if (!isValidNonCaptureMove && !isValidCaptureMove) {
+          console.error("[movePlayer] Move rejected! Not a valid move/capture", {
+            validMoves,
+            validCaptures,
+            targetPos,
+            isCapturing,
+          });
           return;
         }
 
@@ -183,20 +198,9 @@ const gameSlice = createSlice({
           delete state.movingPieces[pieceId];
         });
         state.queuedForDeletion = [];
-        if (isCapturing) {
+        if (isValidCaptureMove) {
           const capturedPieceId =
             state.occupiedCellsMatrix[targetPos.y][targetPos.x];
-
-          const playerCaptureCells = PieceCaptureFunc[state.playerPieceType](
-            state.player.position,
-            state.player.position,
-            extractOccupiedCells(state.occupiedCellsMatrix)
-          );
-
-          if (!arrayHasVector(playerCaptureCells, targetPos)) {
-            // The proposed capture is not valid for the current piece type.
-            return;
-          }
 
           state.xp += getPieceCaptureXPIncrease(
             state.pieces[capturedPieceId].type
