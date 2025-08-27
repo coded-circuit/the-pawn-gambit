@@ -41,7 +41,7 @@ export function getVectorSum(v1, v2) {
   assertIsVector(v2);
   return { x: v1.x + v2.x, y: v1.y + v2.y };
 }
-
+ 
 export function isEven(number) {
   assert(
     !isNaN(number),
@@ -96,4 +96,15 @@ export function assertIsValidPlayerMovement(v1, v2) {
 // ------------------------------------ TIMING UTILITIES ------------------------------------
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+export function extractOccupiedCells(matrix) {
+  const output = [];
+  for (let y = 0; y < 8; y++) {
+    for (let x = 0; x < 8; x++) {
+      if (matrix[y][x] !== false) {
+        output.push({ x, y });
+      }
+    }
+  }
+  return output;
 }

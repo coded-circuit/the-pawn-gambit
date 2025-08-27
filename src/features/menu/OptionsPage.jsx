@@ -25,7 +25,7 @@ const OptionsPage = () => {
   const dispatch = useDispatch();
 
   let difficultyStr = "";
-  switch (currDifficulty) {
+  switch (currDifficulty) { 
     case Difficulty.EASY:
       difficultyStr = "CASUAL";
       break;

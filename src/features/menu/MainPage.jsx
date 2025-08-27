@@ -21,11 +21,13 @@ const MainPage = () => {
   return (
     <main className={styles.mainMenu}>
       <div>
-        <h1 className={styles.logo}>
+        <section className={styles.panel}>
+          <h1 className={styles.logo}>
           <Logo />
-          {/* <span className={styles.subtitle}>THE LAST</span>PAWN */}
         </h1>
-        <button
+        <p className={styles.tagline}>Survive the board. Upgrade. Outplay the horde.</p>
+        <div className={styles.buttons}>
+          <button className={`${styles.cta} ${styles.primary}`}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => {
             if (hasClicked) return;
@@ -34,9 +36,20 @@ const MainPage = () => {
           }}
           disabled={disabled}
         >
-          PLAY
+          SINGLE PLAYER
         </button>
-        <button
+        <button className={`${styles.cta} ${styles.primary}`}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => {  
+            if (hasClicked) return;
+            dispatch(switchPage(PageName.GAME));
+            setHasClicked(true);
+          }}
+          disabled={disabled}
+        >
+          TOURNAMENT
+        </button>
+        <button className={`${styles.cta} ${styles.primary}`}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => {
             if (hasClicked) return;
@@ -47,7 +60,7 @@ const MainPage = () => {
         >
           HOW TO PLAY
         </button>
-        <button
+        <button className={`${styles.cta} ${styles.primary}`}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => {
             if (hasClicked) return;
@@ -58,17 +71,9 @@ const MainPage = () => {
         >
           OPTIONS
         </button>
-        {/* <button
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => {
-            if (hasClicked) return;
-            dispatch(switchPage(PageName.CREDITS));
-            setHasClicked(true);
-          }}
-          disabled={disabled}
-        >
-          CREDITS
-        </button> */}
+        </div>
+        
+        </section>
       </div>
     </main>
   );

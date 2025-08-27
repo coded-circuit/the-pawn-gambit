@@ -1,6 +1,5 @@
 import {
   PieceType,
-  assert,
   assertIsVector,
   arrayHasVector,
   removeVectorInArray,
@@ -8,20 +7,34 @@ import {
 
 import { isValidCell } from "./grid";
 
+export const BlackPieceType = {
+  BLACK_PAWN: "BlackPawn",
+  BLACK_ROOK: "BlackRook",
+  BLACK_BISHOP: "BlackBishop",
+  BLACK_QUEEN: "BlackQueen",
+};
 export const PawnTypes = [
   PieceType.PAWN_N,
   PieceType.PAWN_E,
   PieceType.PAWN_W,
   PieceType.PAWN_S,
+  BlackPieceType.BLACK_PAWN,
 ];
 export const OfficerTypes = [
   PieceType.QUEEN,
   PieceType.ROOK,
   PieceType.BISHOP,
   PieceType.KNIGHT,
+  BlackPieceType.BLACK_QUEEN,
+  BlackPieceType.BLACK_ROOK,
+  BlackPieceType.BLACK_BISHOP,
 ];
 export const PieceCooldown = {
   [PieceType.PLAYER]: null,
+  [BlackPieceType.BLACK_PAWN]: null,
+  [BlackPieceType.BLACK_ROOK]: null,
+  [BlackPieceType.BLACK_BISHOP]: null,
+  [BlackPieceType.BLACK_QUEEN]: null,
   [PieceType.QUEEN]: 5,
   [PieceType.ROOK]: 4,
   [PieceType.BISHOP]: 4,
@@ -33,9 +46,37 @@ export const PieceCooldown = {
 };
 
 export const PieceMovementFunc = {
-  [PieceType.PLAYER]: (pos, playerPos, occupied) => {
-    assert(false, "Player does not have a movement function");
+  /*.....................PLAYERS PIECES..............................*/
+  [BlackPieceType.BLACK_PAWN]: getPlusDirectionMovement,
+  [BlackPieceType.BLACK_QUEEN]: (pos, playerPos, occupied) => {
+    return [].concat(
+      getMoveCellsByDirection(pos, 1, 0, playerPos, occupied),
+      getMoveCellsByDirection(pos, 1, 1, playerPos, occupied),
+      getMoveCellsByDirection(pos, 0, 1, playerPos, occupied),
+      getMoveCellsByDirection(pos, -1, 1, playerPos, occupied),
+      getMoveCellsByDirection(pos, -1, 0, playerPos, occupied),
+      getMoveCellsByDirection(pos, -1, -1, playerPos, occupied),
+      getMoveCellsByDirection(pos, 0, -1, playerPos, occupied),
+      getMoveCellsByDirection(pos, 1, -1, playerPos, occupied)
+    );
   },
+  [BlackPieceType.BLACK_ROOK]: (pos, playerPos, occupied) => {
+    return [].concat(
+      getMoveCellsByDirection(pos, 1, 0, playerPos, occupied),
+      getMoveCellsByDirection(pos, 0, 1, playerPos, occupied),
+      getMoveCellsByDirection(pos, -1, 0, playerPos, occupied),
+      getMoveCellsByDirection(pos, 0, -1, playerPos, occupied)
+    );
+  },
+  [BlackPieceType.BLACK_BISHOP]: (pos, playerPos, occupied) => {
+    return [].concat(
+      getMoveCellsByDirection(pos, 1, 1, playerPos, occupied),
+      getMoveCellsByDirection(pos, -1, 1, playerPos, occupied),
+      getMoveCellsByDirection(pos, -1, -1, playerPos, occupied),
+      getMoveCellsByDirection(pos, 1, -1, playerPos, occupied)
+    );
+  },
+  /*..................WHITE PIECES............................................*/
   [PieceType.QUEEN]: (pos, playerPos, occupied) => {
     return [].concat(
       getMoveCellsByDirection(pos, 1, 0, playerPos, occupied),
@@ -90,9 +131,36 @@ export const PieceMovementFunc = {
   },
 };
 export const PieceCaptureFunc = {
-  [PieceType.PLAYER]: (pos, playerPos, occupied) => {
-    assert(false, "Player does not have a movement function");
+  [BlackPieceType.BLACK_PAWN]: getPlusDirectionCaptures,
+  [BlackPieceType.BLACK_QUEEN]: (pos, playerPos, occupied) => {
+    return [].concat(
+      getCaptureCellsByDirection(pos, 1, 0, playerPos, occupied),
+      getCaptureCellsByDirection(pos, 1, 1, playerPos, occupied),
+      getCaptureCellsByDirection(pos, 0, 1, playerPos, occupied),
+      getCaptureCellsByDirection(pos, -1, 1, playerPos, occupied),
+      getCaptureCellsByDirection(pos, -1, 0, playerPos, occupied),
+      getCaptureCellsByDirection(pos, -1, -1, playerPos, occupied),
+      getCaptureCellsByDirection(pos, 0, -1, playerPos, occupied),
+      getCaptureCellsByDirection(pos, 1, -1, playerPos, occupied)
+    );
   },
+  [BlackPieceType.BLACK_ROOK]: (pos, playerPos, occupied) => {
+    return [].concat(
+      getCaptureCellsByDirection(pos, 1, 0, playerPos, occupied),
+      getCaptureCellsByDirection(pos, 0, 1, playerPos, occupied),
+      getCaptureCellsByDirection(pos, -1, 0, playerPos, occupied),
+      getCaptureCellsByDirection(pos, 0, -1, playerPos, occupied)
+    );
+  },
+  [BlackPieceType.BLACK_BISHOP]: (pos, playerPos, occupied) => {
+    return [].concat(
+      getCaptureCellsByDirection(pos, 1, 1, playerPos, occupied),
+      getCaptureCellsByDirection(pos, -1, 1, playerPos, occupied),
+      getCaptureCellsByDirection(pos, -1, -1, playerPos, occupied),
+      getCaptureCellsByDirection(pos, 1, -1, playerPos, occupied)
+    );
+  },
+  /*................WHITE PIECES */
   [PieceType.QUEEN]: (pos, playerPos, occupied) => {
     return [].concat(
       getCaptureCellsByDirection(pos, 1, 0, playerPos, occupied),
@@ -164,6 +232,26 @@ Object.freeze(OfficerTypes);
 Object.freeze(PieceCooldown);
 Object.freeze(PieceMovementFunc);
 Object.freeze(PieceCaptureFunc);
+Object.freeze(BlackPieceType);
+
+function getPlusDirectionMovement(pos, playerPos, occupied) {
+  const moves = [];
+  const directions = [
+    { x: 0, y: 1 }, // Down
+    { x: 0, y: -1 }, // Up
+    { x: 1, y: 0 }, // Right
+    { x: -1, y: 0 }, // Left
+  ];
+
+  for (const dir of directions) {
+    const targetPos = { x: pos.x + dir.x, y: pos.y + dir.y };
+    // A valid move must be on the board AND not be occupied.
+    if (isValidCell(targetPos) && !arrayHasVector(occupied, targetPos)) {
+      moves.push(targetPos);
+    }
+  }
+  return moves;
+}
 
 function getMoveCellsByOffset(piecePos, playerPos, obs, offsets) {
   assertIsVector(piecePos);
@@ -232,3 +320,22 @@ function getCaptureCellsByDirection(piecePos, dirX, dirY, playerPos, obs) {
   }
   return output;
 }
+function getPlusDirectionCaptures(pos, playerPos, occupied) {
+  const captures = [];
+  const directions = [
+    { x: 0, y: 1 }, // Down
+    { x: 0, y: -1 }, // Up
+    { x: 1, y: 0 }, // Right
+    { x: -1, y: 0 }, // Left
+  ];
+
+  for (const dir of directions) {
+    const targetPos = { x: pos.x + dir.x, y: pos.y + dir.y };
+    // A valid capture must be on the board AND be occupied by another piece.
+    if (isValidCell(targetPos) && arrayHasVector(occupied, targetPos)) {
+      captures.push(targetPos);
+    }
+  }
+  return captures;
+}
+

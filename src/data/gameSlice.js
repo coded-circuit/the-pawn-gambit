@@ -2,35 +2,37 @@ import { createSlice, nanoid } from "@reduxjs/toolkit";
 
 import {
   PieceType,
+  arrayHasVector,
   assert,
   assertIsVector,
-  getVectorSum,
-  arrayHasVector,
-  assertIsValidPlayerMovement,
+  extractOccupiedCells
 } from "../global/utils";
 
 import {
+  OfficerTypes,
+  PawnTypes,
+  PieceCaptureFunc,
   PieceCooldown,
   PieceMovementFunc,
-  PieceCaptureFunc,
-  PawnTypes,
-  OfficerTypes,
 } from "../features/game/logic/piece";
 
+import { BlackPieceType } from "../features/game/logic/piece";
 import {
-  getPassiveScoreIncrease,
-  getPieceCaptureScoreIncrease,
+  getPassiveXPIncrease,
+  getPieceCaptureGems,
+  getPieceCaptureXPIncrease,
+  getSurvivalGems,
 } from "../features/game/logic/score";
-
 export const playerCaptureCooldown = 6;
 const playerSpawnPos = { x: 3, y: 4 };
+
 const initialState = {
   // { pieceId: { position, type, cooldown }, }
   pieces: {},
 
   player: {
     position: { ...playerSpawnPos },
-    type: PieceType.PLAYER,
+    type: BlackPieceType.BLACK_PAWN,
     captureCooldownLeft: playerCaptureCooldown,
   },
 
@@ -47,9 +49,16 @@ const initialState = {
   queuedForDeletion: [],
 
   turnNumber: 0,
-  score: 0,
+  xp: 0,
+  gems: 0,
   isGameOver: false,
+  livesLeft: 4,
+  totalXP: 0,
+  totalGems: 0,
+  totalTurnsSurvived: 0,
+  playerPieceType: BlackPieceType.BLACK_PAWN,
 };
+
 initialState.occupiedCellsMatrix[playerSpawnPos.y][playerSpawnPos.x] =
   "ThePlayer";
 
@@ -58,61 +67,152 @@ const gameSlice = createSlice({
   initialState,
   reducers: {
     resetState: {
-      reducer(state) {
+      reducer() {
         return initialState;
       },
     },
+    addXP: {
+      reducer(state, action) {
+        state.xp += action.payload.xp;
+      },
+      prepare(xp) {
+        return { payload: { xp } };
+      },
+    },
+    restartGame: {
+      reducer(state) {
+        if (state.livesLeft > 0) {
+          state.livesLeft -= 1;
+          state.totalXP = state.xp;
+          state.totalGems = state.gems;
+          state.totalTurnsSurvived = state.totalTurnsSurvived + state.turnNumber;
+          state.xp = state.totalXP;
+          state.gems = state.totalGems - 20;
+          state.turnNumber = 0;
+          state.isGameOver = false;
+          // This correctly resets the piece back to a Pawn
+          state.playerPieceType = BlackPieceType.BLACK_PAWN;
+          state.player.type = BlackPieceType.BLACK_PAWN;
+          state.pieces = {};
+          state.player.position = { ...playerSpawnPos };
+          state.player.captureCooldownLeft = playerCaptureCooldown;
+          state.movingPieces = {};
+          state.captureCells = [];
+          state.occupiedCellsMatrix = new Array(8)
+            .fill()
+            .map(() => new Array(8).fill(false));
+          state.occupiedCellsMatrix[playerSpawnPos.y][playerSpawnPos.x] =
+            "ThePlayer";
+          state.queuedForDeletion = [];
+        }
+      },
+      prepare() {
+        return { payload: {} };
+      },
+    },
+    endGame: {
+      reducer(state) {
+        state.isGameOver = true;
+        state.totalXP = state.xp;
+        state.totalGems = state.gems;
+        state.totalTurnsSurvived = state.totalTurnsSurvived + state.turnNumber;
+      },
+    },
+    // --- MODIFIED REDUCER ---
+    upgradePlayerPiece: {
+      reducer(state) {
+        const currentPiece = state.playerPieceType;
+        let nextPiece = null;
+        let cost = 0;
 
+        switch (currentPiece) {
+          case BlackPieceType.BLACK_PAWN:
+            nextPiece = BlackPieceType.BLACK_ROOK;
+            cost = 10;
+            break;
+          case BlackPieceType.BLACK_ROOK:
+            nextPiece = BlackPieceType.BLACK_BISHOP;
+            cost = 20;
+            break;
+          case BlackPieceType.BLACK_BISHOP:
+            nextPiece = BlackPieceType.BLACK_QUEEN;
+            cost = 30;
+            break;
+          default:
+            // Already at max level (Queen) or an unknown type, so do nothing.
+            return;
+        }
+
+        if (state.gems >= cost) {
+          state.gems -= cost;
+          state.playerPieceType = nextPiece;
+          // Keep the player object in sync
+          state.player.type = nextPiece;
+        }
+      },
+      prepare() {
+        // No payload needed from the UI
+        return { payload: {} };
+      },
+    },
     movePlayer: {
       reducer(state, action) {
-        const { x, y, isCapturing, difficulty } = action.payload;
+        const { targetPos, isCapturing, difficulty } = action.payload;
+        console.log("[movePlayer] Reducer called with target:", targetPos);
+        // Use the PieceMovementFunc to get all valid moves for the current piece
+        const validMoves = PieceMovementFunc[state.playerPieceType](
+          state.player.position,
+          state.player.position,
+          extractOccupiedCells(state.occupiedCellsMatrix)
+        );
+        // Check if the target position is a valid move
+        if (!arrayHasVector(validMoves, targetPos)) {
+          console.error("[movePlayer] Move rejected! Target not in valid moves:", validMoves);
+          return;
+        }
+
         state.turnNumber += 1;
-        state.score += getPassiveScoreIncrease(difficulty, state.turnNumber);
+        state.xp += getPassiveXPIncrease(difficulty, state.turnNumber);
+        state.gems += getSurvivalGems();
         if (state.player.captureCooldownLeft > 0) {
           state.player.captureCooldownLeft -= 1;
         }
-        if (x === 0 && y === 0) return state;
-
-        const currPosition = state.player.position;
-        const newPosition = getVectorSum(currPosition, { x, y });
-
         // Clears queued for deletion
         state.queuedForDeletion.forEach((pieceId) => {
           delete state.pieces[pieceId];
           delete state.movingPieces[pieceId];
         });
         state.queuedForDeletion = [];
-
         if (isCapturing) {
-          assert(
-            state.occupiedCellsMatrix[newPosition.y][newPosition.x] !== false,
-            "Player trying to capture an unoccupied cell!"
-          );
           const capturedPieceId =
-            state.occupiedCellsMatrix[newPosition.y][newPosition.x];
+            state.occupiedCellsMatrix[targetPos.y][targetPos.x];
 
-          // Update player score
-          state.score += getPieceCaptureScoreIncrease(
-            difficulty,
+          const playerCaptureCells = PieceCaptureFunc[state.playerPieceType](
+            state.player.position,
+            state.player.position,
+            extractOccupiedCells(state.occupiedCellsMatrix)
+          );
+
+          if (!arrayHasVector(playerCaptureCells, targetPos)) {
+            // The proposed capture is not valid for the current piece type.
+            return;
+          }
+
+          state.xp += getPieceCaptureXPIncrease(
             state.pieces[capturedPieceId].type
           );
-
-          // Instead of deleting immediately, queue it for deletion for next player move
+          state.gems += getPieceCaptureGems(state.pieces[capturedPieceId].type);
           queueDelete(state, capturedPieceId);
-
-          // Reset player capture cooldown
           state.player.captureCooldownLeft = playerCaptureCooldown;
         }
-
-        assertIsValidPlayerMovement(currPosition, newPosition);
-
-        // Since player doesn't have a piece id, set it as "ThePlayer"
+        const currPosition = state.player.position;
+        const newPosition = targetPos;
         moveOccupiedCell(state, currPosition, newPosition, "ThePlayer");
         state.player.position.x = newPosition.x;
         state.player.position.y = newPosition.y;
       },
-      prepare(x, y, isCapturing, difficulty) {
-        return { payload: { x, y, isCapturing, difficulty } };
+      prepare(targetPos, isCapturing, difficulty) {
+        return { payload: { targetPos, isCapturing, difficulty } };
       },
     },
 
@@ -158,7 +258,6 @@ const gameSlice = createSlice({
             occupiedCells
           );
 
-          // Check if player is on a capture cell
           if (arrayHasVector(pieceCaptureCells, currPlayerPos)) {
             gameOver = true;
             state.occupiedCellsMatrix[currPlayerPos.y][currPlayerPos.x] = false;
@@ -174,14 +273,11 @@ const gameSlice = createSlice({
             occupiedCells
           );
 
-          // If the piece doesn't have anywhere to move, remove from moving pieces
           if (pieceMoveCells.length <= 0) {
             delete state.movingPieces[pieceId];
             return;
           }
 
-          // If it does have moves, try finding a valid one by checking if a random
-          // move was already chosen by a different piece, up to three times.
           const maxRetries = 3;
           let retry = 0;
           let move = null;
@@ -195,7 +291,6 @@ const gameSlice = createSlice({
             retry++;
           }
 
-          // If no move was selected, remove from moving pieces.
           if (move === null) {
             delete state.movingPieces[pieceId];
           } else {
@@ -213,12 +308,10 @@ const gameSlice = createSlice({
           return state;
         }
 
-        // move moving pieces
         Object.keys(state.movingPieces).forEach((pieceId) => {
           const piecePos = state.pieces[pieceId].position;
           const newPosition = state.movingPieces[pieceId];
 
-          // If moving to player's position, return
           if (
             newPosition.x === currPlayerPos.x &&
             newPosition.y === currPlayerPos.y
@@ -237,7 +330,6 @@ const gameSlice = createSlice({
           state.pieces[pieceId].position.y = newPosition.y;
           state.pieces[pieceId].movesMade += 1;
 
-          // Check for promoting pawns
           const piece = state.pieces[pieceId];
           const pos = state.pieces[pieceId].position;
           if (PawnTypes.includes(piece.type)) {
@@ -257,22 +349,56 @@ const gameSlice = createSlice({
           }
         });
 
-        // update ALL of the pieces' cooldowns
+        Object.keys(state.movingPieces).forEach((pieceId) => {
+          const piecePos = state.pieces[pieceId].position;
+          const newPosition = state.movingPieces[pieceId];
+
+          if (
+            newPosition.x === currPlayerPos.x &&
+            newPosition.y === currPlayerPos.y
+          ) {
+            return;
+          }
+
+          assert(newPosition !== null, "Moving with a null move!");
+          assert(
+            !(newPosition.x === piecePos.x && newPosition.y === piecePos.y),
+            "Moving to own position!"
+          );
+
+          moveOccupiedCell(state, piecePos, newPosition, pieceId);
+          state.pieces[pieceId].position.x = newPosition.x;
+          state.pieces[pieceId].position.y = newPosition.y;
+          state.pieces[pieceId].movesMade += 1;
+
+          const piece = state.pieces[pieceId];
+          const pos = state.pieces[pieceId].position;
+          if (PawnTypes.includes(piece.type)) {
+            if (piece.movesMade === 7) {
+              queueDelete(state, pieceId);
+
+              const promotionType =
+                OfficerTypes[Math.floor(Math.random() * OfficerTypes.length)];
+              const { pieceId: newPieceId, newPiece } = createPiece(
+                pos.x,
+                pos.y,
+                promotionType
+              );
+              state.pieces[newPieceId] = newPiece;
+              state.occupiedCellsMatrix[pos.y][pos.x] = newPieceId;
+            }
+          }
+        });
+
         Object.keys(state.pieces).forEach((pieceId) => {
-          // console.log("UPDATING PIECE:", pieceId);
           const piece = state.pieces[pieceId];
 
-          // If cooldown is currently zero, reset and remove from moving pieces
           if (piece.cooldown === 0) {
             piece.cooldown = PieceCooldown[piece.type];
             delete state.movingPieces[pieceId];
-          }
-
-          // If cooldown is not zero, reduce by one
-          else {
+          } else {
             piece.cooldown -= 1;
 
-            // If cooldown is now zero, add to moving pieces with null move
             if (piece.cooldown === 0) {
               state.movingPieces[pieceId] = null;
             }
@@ -285,7 +411,6 @@ const gameSlice = createSlice({
       reducer(state) {
         const currPlayerPos = state.player.position;
 
-        // loop over all the NEW moving pieces and update capture cells
         state.captureCells = [];
         const newOccCells = extractOccupiedCells(state.occupiedCellsMatrix);
         Object.keys(state.movingPieces).forEach((pieceId) => {
@@ -302,7 +427,6 @@ const gameSlice = createSlice({
   },
 });
 
-// SELECT FUNCTIONS --------------------------------------
 export const selectAllPieces = (state) => state.game.pieces;
 export const selectOccupiedCellsMatrix = (state) =>
   state.game.occupiedCellsMatrix;
@@ -311,20 +435,29 @@ export const selectPlayerPosition = (state) => state.game.player.position;
 export const selectPlayerCaptureCooldown = (state) =>
   state.game.player.captureCooldownLeft;
 export const selectTurnNumber = (state) => state.game.turnNumber;
-export const selectScore = (state) => state.game.score;
+export const selectXP = (state) => state.game.xp;
+export const selectGems = (state) => state.game.gems;
 export const selectIsGameOver = (state) => state.game.isGameOver;
+export const selectLivesLeft = (state) => state.game.livesLeft;
+export const selectTotalXP = (state) => state.game.totalXP;
+export const selectTotalGems = (state) => state.game.totalGems;
+export const selectTotalTurnsSurvived = (state) =>
+  state.game.totalTurnsSurvived;
+export const selectPlayerPieceType = (state) => state.game.playerPieceType;
 
-// ACTION EXPORTS --------------------------------------
 export const {
   resetState,
   movePlayer,
   addPiece,
   processPieces,
   updateCaptureTiles,
+  addXP,
+  restartGame,
+  endGame,
+  upgradePlayerPiece,
 } = gameSlice.actions;
 export default gameSlice.reducer;
 
-// -------------------------------------- PRIVATE FUNCTIONS --------------------------------------
 function moveOccupiedCell(state, v1, v2, pieceId) {
   assertIsVector(v1);
   assertIsVector(v2);
@@ -339,24 +472,11 @@ function moveOccupiedCell(state, v1, v2, pieceId) {
   );
   state.occupiedCellsMatrix[v1.y][v1.x] = false;
   assert(
-    state.occupiedCellsMatrix[v1.y][v1.x] === false,
+    state.occupiedCellsMatrix[v2.y][v2.x] === false,
     "Moving to an occupied cell!"
   );
   state.occupiedCellsMatrix[v2.y][v2.x] = pieceId;
 }
-
-function extractOccupiedCells(matrix) {
-  const output = [];
-  for (let y = 0; y < 8; y++) {
-    for (let x = 0; x < 8; x++) {
-      if (matrix[y][x] !== false) {
-        output.push({ x, y });
-      }
-    }
-  }
-  return output;
-}
-
 function createPiece(x, y, type) {
   const pieceId = nanoid();
   const newPiece = {

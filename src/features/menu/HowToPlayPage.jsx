@@ -14,7 +14,7 @@ const HowToPlayPage = () => {
   useEffect(() => {
     (async () => {
       await sleep(TRANSITION_HALF_LIFE);
-      setDisabled(false);
+      setDisabled(false); 
     })();
   }, []);
 

@@ -1,4 +1,5 @@
-$gameOverHeight: 20rem;
+$gameOverHeight: 40rem;
+$gameOverWidth: 100vw;
 
 .hud {
   width: 100vw;
@@ -10,33 +11,34 @@ $gameOverHeight: 20rem;
 .touchArea {
   width: 100%;
   height: 100%;
+  pointer-events: none;
 }
 
 .gameOver {
-  width: 100vw;
+  width: $gameOverWidth;
   height: $gameOverHeight;
   position: absolute;
-  top: calc((100vh - $gameOverHeight) / 2);
+  top: calc((100vh - $gameOverHeight)/2);
+  left: calc((100vw - $gameOverWidth) / 2);
   z-index: 2;
   background-color: rgba(0, 0, 0, 0.5);
-
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-
+  gap: 1rem;
   text-align: center;
   word-spacing: -0.2rem;
   text-shadow: 0 0 0.5rem black;
 
   animation: slideUp 2s cubic-bezier(0.25, 1, 0.5, 1);
-
   span.gameOverText {
     // color: theme.$acc-clr-3;
     color: theme.$light-clr-1;
-    margin-bottom: -0.3rem;
+    // text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    margin-bottom: 0.3rem;
     margin-top: -1rem;
-    font-size: 3rem;
+    font-size: 6rem;
   }
   span.scoreText {
     // color: theme.$light-clr-1;
@@ -48,8 +50,45 @@ $gameOverHeight: 20rem;
   span.subtitleText {
     // color: theme.$acc-clr-3;
     color: theme.$light-clr-1;
-    font-size: 1.8rem;
+    font-size: 2.8rem;
   }
+  span.titleText{
+     color: theme.$light-clr-1;
+     font-size: 3.8rem;
+  }
+  div.gameBox{
+    display: flex;
+    gap: 3rem;
+    border: 1px dashed whitesmoke;
+    padding: 10px 20px;
+    margin-bottom: 2rem;
+    border-radius: 20px;
+    span div{
+      color: theme.$acc-clr-3 ;
+      @include theme.breathing;
+    }
+    
+  }
+  div.gameBox2{
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    border: 1px dashed whitesmoke;
+    padding: 10px 20px;
+    margin-bottom: 2rem;
+    border-radius: 20px;
+    span div{
+      color: theme.$acc-clr-3 ;
+      @include theme.breathing;
+    }
+    
+  }
+  button.playagain{
+     width: calc(theme.$grid-scale / 8 * 1);
+     width: 5rem;
+
+  }
+
 }
 
 .notGameOver {
@@ -128,6 +167,36 @@ $gameOverHeight: 20rem;
     }
   }
 }
+.upgradeButtonsContainer {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1rem;
+  z-index: 100;
+}
+
+.upgradeButton {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+
+  &:hover:not([disabled]) {
+    background-color: #45a049;
+  }
+
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
 
 .puff {
   animation: puff 0.2s;
@@ -154,5 +223,15 @@ $gameOverHeight: 20rem;
 
   100% {
     top: calc((100vh - $gameOverHeight) / 2);
+  }
+}
+@keyframes fadeInScale {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
 }

@@ -1,49 +1,81 @@
 import { Difficulty, PieceType } from "../../../global/utils";
 
-const survivalTurnMilestones = {
-  0: 50, // 0-49
+// Experience Points (XP) Breakdown
+const survivalXPMilestones = {
+  0: 50,
   50: 100,
   100: 200,
   200: 300,
   300: 500,
 };
+const pieceCaptureXP = {
+  [PieceType.PLAYER]: null,
+  [PieceType.QUEEN]: 500,
+  [PieceType.ROOK]: 200,
+  [PieceType.BISHOP]: 200,
+  [PieceType.KNIGHT]: 100,
+  [PieceType.PAWN_N]: 100,
+  [PieceType.PAWN_E]: 100,
+  [PieceType.PAWN_W]: 100,
+  [PieceType.PAWN_S]: 100,
+};
+const timeBonusXP = 1;
+
+// Existing constants for gems and difficulty
 const difficultyMultiplier = {
   [Difficulty.EASY]: 1.0,
   [Difficulty.NORMAL]: 1.5,
   [Difficulty.HARD]: 2.0,
 };
-const pieceCaptureReward = {
-  [PieceType.PLAYER]: null,
-  [PieceType.QUEEN]: 2000,
-  [PieceType.ROOK]: 1500,
-  [PieceType.BISHOP]: 800,
-  [PieceType.KNIGHT]: 800,
-  [PieceType.PAWN_N]: 300,
-  [PieceType.PAWN_E]: 300,
-  [PieceType.PAWN_W]: 300,
-  [PieceType.PAWN_S]: 300,
+const survivalGemReward = 1;
+const pieceCaptureGemReward = {
+  [PieceType.PLAYER]: 0,
+  [PieceType.QUEEN]: 5,
+  [PieceType.ROOK]: 4,
+  [PieceType.BISHOP]: 4,
+  [PieceType.KNIGHT]: 3,
+  [PieceType.PAWN_N]: 3,
+  [PieceType.PAWN_E]: 3,
+  [PieceType.PAWN_W]: 3,
+  [PieceType.PAWN_S]: 3,
 };
 
-Object.freeze(survivalTurnMilestones);
+Object.freeze(survivalXPMilestones);
+Object.freeze(pieceCaptureXP);
+Object.freeze(timeBonusXP);
 Object.freeze(difficultyMultiplier);
-Object.freeze(pieceCaptureReward);
+Object.freeze(survivalGemReward);
+Object.freeze(pieceCaptureGemReward);
 
-export function getPassiveScoreIncrease(difficulty, turnNumber) {
+
+export function getPassiveXPIncrease(difficulty, turnNumber) {
   let prevMilestone = 0;
-  for (let milestone in survivalTurnMilestones) {
-    if (turnNumber > Number(milestone)) {
+  for (let milestone in survivalXPMilestones) {
+    if (turnNumber >= Number(milestone)) {
       prevMilestone = milestone;
       continue;
     }
     return (
-      survivalTurnMilestones[prevMilestone] * difficultyMultiplier[difficulty]
+      (survivalXPMilestones[prevMilestone]) * difficultyMultiplier[difficulty]
     );
   }
   return (
-    survivalTurnMilestones[prevMilestone] * difficultyMultiplier[difficulty]
+    (survivalXPMilestones[prevMilestone]) * difficultyMultiplier[difficulty]
   );
 }
 
-export function getPieceCaptureScoreIncrease(difficulty, pieceType) {
-  return pieceCaptureReward[pieceType] * difficultyMultiplier[difficulty];
+export function getPieceCaptureXPIncrease(pieceType) {
+  return pieceCaptureXP[pieceType];
+}
+
+export function getSurvivalGems() {
+  return survivalGemReward;
+}
+
+export function getPieceCaptureGems(pieceType) {
+  return pieceCaptureGemReward[pieceType];
+}
+
+export function getPerSecondXPIncrease(difficulty) {
+  return timeBonusXP * difficultyMultiplier[difficulty];
 }

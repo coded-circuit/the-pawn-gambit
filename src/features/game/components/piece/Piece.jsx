@@ -6,14 +6,19 @@ import {
   sleep,
 } from "../../../../global/utils";
 import styles from "./Piece.module.scss";
-
+import { BlackPieceType } from "../../logic/piece";
 import Bishop from "./BishopSvg";
 import Knight from "./KnightSvg";
 import Pawn from "./PawnSvg";
-import Player from "./PlayerSvg";
+// import Player from "./PlayerSvg";
 import Queen from "./QueenSvg";
 import Rook from "./RookSvg";
 import Shadow from "./ShadowSvg";
+
+import BlackBishop from "./Players/BlackBishopSvg";
+import BlackPawn from "./Players/BlackPawnSvg";
+import BlackQueen from "./Players/BlackQueen";
+import BlackRook from "./Players/BlackRook";
 
 const Piece = ({ gridPos, type, cooldownLeft, isCaptured }) => {
   assertIsVector(gridPos);
@@ -37,8 +42,17 @@ const Piece = ({ gridPos, type, cooldownLeft, isCaptured }) => {
 
   let pieceComponent;
   switch (type) {
-    case PieceType.PLAYER:
-      pieceComponent = <Player />;
+    case BlackPieceType.BLACK_PAWN:
+      pieceComponent = <BlackPawn />;
+      break;
+    case BlackPieceType.BLACK_ROOK:
+      pieceComponent = <BlackRook />;
+      break;
+    case BlackPieceType.BLACK_BISHOP:
+      pieceComponent = <BlackBishop />;
+      break;
+    case BlackPieceType.BLACK_QUEEN:
+      pieceComponent = <BlackQueen />;
       break;
     case PieceType.QUEEN:
       pieceComponent = <Queen />;
