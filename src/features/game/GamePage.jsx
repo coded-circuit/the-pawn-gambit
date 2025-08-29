@@ -1,27 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  addPiece,
   addXP,
   endGame,
   movePlayer,
   playerCaptureCooldown,
   processPieces,
   resetState,
-  selectAllPieces,
-  selectCaptureCells,
-  selectGems,
-  selectIsGameOver,
-  selectLivesLeft,
-  selectOccupiedCellsMatrix,
-  selectPlayerCaptureCooldown,
-  selectPlayerPieceType,
-  selectPlayerPosition,
-  selectTotalGems,
-  selectTotalTurnsSurvived,
-  selectTotalXP,
-  selectTurnNumber,
-  selectXP,
   updateCaptureTiles,
 } from "../../data/gameSlice";
 import GridCell from "./components/grid-cell/GridCell";
@@ -29,118 +14,76 @@ import Piece from "./components/piece/Piece";
 import UI from "./components/ui/UI";
 import styles from "./GamePage.module.scss";
 
-import { arrayHasVector, extractOccupiedCells, sleep } from "../../global/utils";
-import { PieceMovementFunc } from "./logic/piece";
+import { arrayHasVector, extractOccupiedCells } from "../../global/utils";
+import { PieceCaptureFunc, PieceMovementFunc } from "./logic/piece";
 import { getPerSecondXPIncrease } from "./logic/score";
-import { getNumberToSpawn, getPieceWithPos } from "./logic/spawning";
 
 import { selectDifficulty } from "../../data/menuSlice";
 import store from "../../data/store";
 
 const GamePage = () => {
   const dispatch = useDispatch();
-  const pieces = useSelector(selectAllPieces);
-  const occupiedCellsMatrix = useSelector(selectOccupiedCellsMatrix);
-  const captureCells = useSelector(selectCaptureCells);
-  const playerPosition = useSelector(selectPlayerPosition);
-  const playerCooldownLeft = useSelector(selectPlayerCaptureCooldown);
-  const turnNumber = useSelector(selectTurnNumber);
-  const xp = useSelector(selectXP);
-  const isGameOver = useSelector(selectIsGameOver);
-  const difficulty = useSelector(selectDifficulty);
-  const gems = useSelector(selectGems);
-  const livesLeft = useSelector(selectLivesLeft);
-  const totalXP = useSelector(selectTotalXP);
-  const totalGems = useSelector(selectTotalGems);
-  const totalTurnsSurvived = useSelector(selectTotalTurnsSurvived);
-  const playerPieceType = useSelector(selectPlayerPieceType);
-  const [potentialMoves, setPotentialMoves] = useState([]);
-  const inactivityTimer = useRef(null);
 
-  // Initialize game on mount
+  const {
+    pieces,
+    occupiedCellsMatrix,
+    captureCells,
+    playerPosition,
+    playerCooldownLeft,
+    turnNumber,
+    xp,
+    gems,
+    livesLeft,
+    isGameOver,
+    playerPieceType,
+    totalXP,
+    totalGems,
+    totalTurnsSurvived,
+  } = useSelector((state) => state.game);
+  const difficulty = useSelector(selectDifficulty);
+  const [potentialMoves, setPotentialMoves] = useState([]);
+
   useEffect(() => {
     dispatch(resetState());
   }, [dispatch]);
-
-  // Timed XP Gain
   useEffect(() => {
-    if (isGameOver) {
-      return;
-    }
-    const xpPerSecond = getPerSecondXPIncrease(difficulty);
+    if (isGameOver) return;
     const intervalId = setInterval(() => {
-      dispatch(addXP(xpPerSecond));
+      dispatch(addXP(getPerSecondXPIncrease(difficulty)));
     }, 1000);
     return () => clearInterval(intervalId);
   }, [isGameOver, difficulty, dispatch]);
 
-  // Calculate potential moves whenever the board state changes
   useEffect(() => {
-    if (isGameOver) {
-      setPotentialMoves([]); // Clear moves when game is over
+    if (isGameOver || !playerPosition) {
+      setPotentialMoves([]);
       return;
     }
-    const moves = PieceMovementFunc[playerPieceType](
-      playerPosition,
-      playerPosition,
-      extractOccupiedCells(occupiedCellsMatrix)
-    );
-    setPotentialMoves(moves);
+    const occupied = extractOccupiedCells(occupiedCellsMatrix);
+    const moves = PieceMovementFunc[playerPieceType](playerPosition, playerPosition, occupied);
+    const captures = PieceCaptureFunc[playerPieceType](playerPosition, playerPosition, occupied);
+    setPotentialMoves([...moves, ...captures]);
   }, [playerPosition, playerPieceType, occupiedCellsMatrix, isGameOver]);
 
-  // Unified game turn logic
   const handleCellClick = (pos) => {
-    // Prevent moves if the game is over
     if (isGameOver) return;
+    const isCapturing = occupiedCellsMatrix[pos.y][pos.x] !== false;
+    dispatch(movePlayer({ targetPos: pos, isCapturing, difficulty }));
 
-    if (arrayHasVector(potentialMoves, pos)) {
-      // Clear any existing timer as soon as a valid move starts
-      if (inactivityTimer.current) {
-        clearTimeout(inactivityTimer.current);
+    setTimeout(() => {
+      dispatch(processPieces());
+      dispatch(updateCaptureTiles());
+
+      const currentState = store.getState().game;
+      if (currentState.isGameOver && currentState.livesLeft <= 0) {
+        dispatch(endGame());
       }
-
-      let isCapturing = occupiedCellsMatrix[pos.y][pos.x] !== false;
-
-      (async () => {
-        // --- Core Game Loop ---
-        dispatch(movePlayer(pos, isCapturing, difficulty));
-        await sleep(100);
-        dispatch(processPieces());
-        dispatch(updateCaptureTiles());
-        await sleep(200);
-
-        // Check for game over after enemy pieces have moved
-        if (store.getState().game.isGameOver) {
-          if (store.getState().game.livesLeft <= 0) {
-            dispatch(endGame());
-          }
-          return; // Stop the turn if the game is over
-        }
-
-        // Spawn new pieces
-        for (let i = 0; i < getNumberToSpawn(difficulty); i++) {
-          const { type, pos: spawnPos } = getPieceWithPos(difficulty);
-          if (
-            store.getState().game.occupiedCellsMatrix[spawnPos.y][spawnPos.x] === false
-          ) {
-            dispatch(addPiece(spawnPos.x, spawnPos.y, type));
-          }
-        }
-        await sleep(5);
-        dispatch(updateCaptureTiles());
-
-        // --- Turn End ---
-        // After a successful turn, set a new inactivity timer
-        inactivityTimer.current = setTimeout(() => {
-          dispatch(endGame());
-        }, 20000); // 20 seconds
-      })();
-    }
+    }, 100);
   };
 
   const pieceComponents = useMemo(
     () =>
-      Object.keys(pieces).map((pieceId) => (
+      pieces ? Object.keys(pieces).map((pieceId) => (
         <Piece
           key={pieceId}
           gridPos={pieces[pieceId].position}
@@ -148,31 +91,29 @@ const GamePage = () => {
           cooldownLeft={pieces[pieceId].cooldown}
           isCaptured={pieces[pieceId].isCaptured}
         />
-      )),
+      )) : [],
     [pieces]
   );
 
   const gridCellComponents = useMemo(() => {
-    const output = Array.from({ length: 8 }, () => Array(8).fill(null));
-    for (let y = 0; y < 8; y++) {
-      for (let x = 0; x < 8; x++) {
-        const isPotentialMove = arrayHasVector(potentialMoves, { x, y });
-        const isCaptureCell = captureCells.some(
-          (cell) => cell.x === x && cell.y === y
-        );
-        output[y][x] = (
-          <GridCell
-            key={`${x}-${y}`}
-            pos={{ x, y }}
-            isCapture={isCaptureCell}
-            onClick={() => handleCellClick({ x, y })}
-            isPotentialMove={isPotentialMove}
-          />
-        );
-      }
-    }
-    return output;
+    return Array.from({ length: 64 }, (_, i) => {
+      const x = i % 8;
+      const y = Math.floor(i / 8);
+      const pos = { x, y };
+      const isPotentialMove = arrayHasVector(potentialMoves, pos);
+
+      return (
+        <GridCell
+          key={`${x}-${y}`}
+          pos={pos}
+          isCapture={captureCells.some((cell) => cell.x === x && cell.y === y)}
+          onClick={() => handleCellClick(pos)}
+          isPotentialMove={isPotentialMove}
+        />
+      );
+    });
   }, [potentialMoves, captureCells]);
+  
 
   return (
     <main>
@@ -194,11 +135,12 @@ const GamePage = () => {
       <div className={styles.graphicsGridTrunk}></div>
       <div className={styles.gridContainer}>{gridCellComponents}</div>
       <div className={styles.piecesContainer}>
-        <Piece
-          gridPos={playerPosition}
-          type={playerPieceType}
-          isCaptured={isGameOver}
-        />
+        
+          <Piece
+            gridPos={playerPosition}
+            type={playerPieceType}
+            isCaptured={isGameOver}
+          />
         {pieceComponents}
       </div>
     </main>

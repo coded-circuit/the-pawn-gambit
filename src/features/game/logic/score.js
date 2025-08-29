@@ -1,4 +1,4 @@
-import { Difficulty, PieceType } from "../../../global/utils";
+import { Difficulty, PieceType,BlackPieceType } from "../../../global/utils";
 
 // Experience Points (XP) Breakdown
 const survivalXPMilestones = {
@@ -9,7 +9,10 @@ const survivalXPMilestones = {
   300: 500,
 };
 const pieceCaptureXP = {
-  [PieceType.PLAYER]: null,
+  [BlackPieceType.BLACK_PAWN]:null,
+  [BlackPieceType.BLACK_ROOK]:null,
+  [BlackPieceType.BLACK_QUEEN]:null,
+  [BlackPieceType.BLACK_BISHOP]:null,
   [PieceType.QUEEN]: 500,
   [PieceType.ROOK]: 200,
   [PieceType.BISHOP]: 200,
@@ -29,7 +32,10 @@ const difficultyMultiplier = {
 };
 const survivalGemReward = 1;
 const pieceCaptureGemReward = {
-  [PieceType.PLAYER]: 0,
+  [BlackPieceType.BLACK_PAWN]: null,
+  [BlackPieceType.BLACK_BISHOP]: null,
+  [BlackPieceType.BLACK_QUEEN]: null,
+  [BlackPieceType.BLACK_ROOK]: null,
   [PieceType.QUEEN]: 5,
   [PieceType.ROOK]: 4,
   [PieceType.BISHOP]: 4,

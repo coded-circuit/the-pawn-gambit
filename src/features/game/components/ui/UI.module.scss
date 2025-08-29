@@ -1,3 +1,5 @@
+/* In UI.module.scss */
+
 $gameOverHeight: 40rem;
 $gameOverWidth: 100vw;
 
@@ -6,21 +8,30 @@ $gameOverWidth: 100vw;
   height: 100vh;
   position: absolute;
   z-index: theme.$z-ind-game-ui;
+  /* UPDATED: This allows clicks to pass through the main container... */
+  pointer-events: none;
 }
 
 .touchArea {
   width: 100%;
   height: 100%;
-  pointer-events: none;
+  pointer-events: none; /* This should also be none */
+}
+
+/* ...but we re-enable them for the specific UI elements that need to be clicked. */
+.upperRight,
+.upgradeButtonsContainer,
+.gameOver {
+  pointer-events: auto;
 }
 
 .gameOver {
   width: $gameOverWidth;
   height: $gameOverHeight;
   position: absolute;
-  top: calc((100vh - $gameOverHeight)/2);
+  top: calc((100vh - $gameOverHeight) / 2);
   left: calc((100vw - $gameOverWidth) / 2);
-  z-index: 2;
+  z-index: 200;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
@@ -30,46 +41,41 @@ $gameOverWidth: 100vw;
   text-align: center;
   word-spacing: -0.2rem;
   text-shadow: 0 0 0.5rem black;
-
   animation: slideUp 2s cubic-bezier(0.25, 1, 0.5, 1);
+
   span.gameOverText {
-    // color: theme.$acc-clr-3;
     color: theme.$light-clr-1;
-    // text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     margin-bottom: 0.3rem;
     margin-top: -1rem;
     font-size: 6rem;
   }
   span.scoreText {
-    // color: theme.$light-clr-1;
     color: theme.$acc-clr-3;
     margin-bottom: 0.5rem;
     font-size: 6rem;
     @include theme.breathing;
   }
   span.subtitleText {
-    // color: theme.$acc-clr-3;
     color: theme.$light-clr-1;
     font-size: 2.8rem;
   }
-  span.titleText{
-     color: theme.$light-clr-1;
-     font-size: 3.8rem;
+  span.titleText {
+    color: theme.$light-clr-1;
+    font-size: 3.8rem;
   }
-  div.gameBox{
+  div.gameBox {
     display: flex;
     gap: 3rem;
     border: 1px dashed whitesmoke;
     padding: 10px 20px;
     margin-bottom: 2rem;
     border-radius: 20px;
-    span div{
-      color: theme.$acc-clr-3 ;
+    span div {
+      color: theme.$acc-clr-3;
       @include theme.breathing;
     }
-    
   }
-  div.gameBox2{
+  div.gameBox2 {
     display: flex;
     flex-direction: column;
     gap: 3rem;
@@ -77,22 +83,14 @@ $gameOverWidth: 100vw;
     padding: 10px 20px;
     margin-bottom: 2rem;
     border-radius: 20px;
-    span div{
-      color: theme.$acc-clr-3 ;
+    span div {
+      color: theme.$acc-clr-3;
       @include theme.breathing;
     }
-    
   }
-  button.playagain{
-     width: calc(theme.$grid-scale / 8 * 1);
-     width: 5rem;
-
+  button.playagain {
+    width: 5rem;
   }
-
-}
-
-.notGameOver {
-  display: none;
 }
 
 .upperLeft,
@@ -110,14 +108,12 @@ $gameOverWidth: 100vw;
   display: flex;
   flex-direction: column;
   align-items: start;
-
   color: theme.$acc-clr-1;
 
   span.uiVariable {
     margin-bottom: 0.5rem;
     font-size: 4rem;
   }
-
   span.uiLabel {
     margin-bottom: -0.5rem;
     font-size: 2rem;
@@ -133,7 +129,6 @@ $gameOverWidth: 100vw;
 
 .upperCenter {
   $width: 60vmin;
-
   left: calc((100vw - $width) / 2);
   top: calc(50vh - 45vmin);
   width: $width;
@@ -145,7 +140,6 @@ $gameOverWidth: 100vw;
     width: 100%;
     height: 100%;
     border-radius: 3vmin;
-
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -217,21 +211,11 @@ $gameOverWidth: 100vw;
 }
 
 @keyframes slideUp {
-  0%, 40% {
+  0%,
+  40% {
     top: -$gameOverHeight;
   }
-
   100% {
     top: calc((100vh - $gameOverHeight) / 2);
-  }
-}
-@keyframes fadeInScale {
-  from {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
   }
 }

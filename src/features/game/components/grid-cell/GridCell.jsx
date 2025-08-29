@@ -6,9 +6,6 @@ import styles from "./GridCell.module.scss";
 import GridCellWarning from "./GridCellWarning";
 
 const GridCell = ({ pos, isCapture, isPotentialMove, onClick }) => {
-  // This new log will tell us if the onClick prop is being received as a function.
-  console.log(`GridCell at [${pos.x}, ${pos.y}] received onClick:`, typeof onClick === 'function');
-
   const showIndicators = useSelector(selectShowIndicators);
   const onEvenX = isEven(pos.x);
   const onEvenY = isEven(pos.y);
@@ -30,6 +27,7 @@ const GridCell = ({ pos, isCapture, isPotentialMove, onClick }) => {
     </div>
   );
 };
+
 GridCell.propTypes = {
   pos: PropTypes.shape({
     x: PropTypes.number.isRequired,
@@ -39,6 +37,5 @@ GridCell.propTypes = {
   isPotentialMove: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
 };
-
 
 export default GridCell;

@@ -2,15 +2,20 @@
 export const TRANSITION_HALF_LIFE = 750;
 
 export const PieceType = {
-  PLAYER: 0,
-  QUEEN: 1,
-  ROOK: 2,
-  BISHOP: 3,
-  KNIGHT: 4,
-  PAWN_N: 5,
-  PAWN_E: 6,
-  PAWN_W: 7,
-  PAWN_S: 8,
+  QUEEN: "Queen",
+  ROOK: "Rook",
+  BISHOP: "Bishop",
+  KNIGHT: "Knight",
+  PAWN_N: "PawnN",
+  PAWN_E: "PawnE",
+  PAWN_W: "PawnW",
+  PAWN_S: "PawnS",
+};
+export const BlackPieceType = {
+  BLACK_PAWN: "BlackPawn",
+  BLACK_ROOK: "BlackRook",
+  BLACK_BISHOP: "BlackBishop",
+  BLACK_QUEEN: "BlackQueen",
 };
 export const PageName = {
   MAIN_MENU: 0,
@@ -26,6 +31,7 @@ export const Difficulty = {
 };
 
 Object.freeze(PieceType);
+Object.freeze(BlackPieceType);
 Object.freeze(PageName);
 Object.freeze(Difficulty);
 
@@ -41,7 +47,7 @@ export function getVectorSum(v1, v2) {
   assertIsVector(v2);
   return { x: v1.x + v2.x, y: v1.y + v2.y };
 }
- 
+
 export function isEven(number) {
   assert(
     !isNaN(number),
@@ -52,10 +58,7 @@ export function isEven(number) {
 
 export function arrayHasVector(array, vector) {
   assertIsVector(vector);
-  return (
-    array.find((item) => item.x === vector.x && item.y === vector.y) !==
-    undefined
-  );
+  return array.some((item) => item.x === vector.x && item.y === vector.y);
 }
 
 export function removeVectorInArray(array, vector) {
@@ -72,31 +75,14 @@ export function assert(condition, message) {
   }
 }
 
+// --- THIS FUNCTION HAS BEEN CORRECTED ---
 export function assertIsVector(vector) {
   assert(
-    vector.hasOwnProperty("x") && vector.hasOwnProperty("y"),
+    vector && vector.hasOwnProperty("x") && vector.hasOwnProperty("y"),
     `Vector assertion failed: ${vector}`
   );
 }
 
-export function assertIsValidNonPlayerPiece(pieceType) {
-  assert(
-    pieceType > 0 && pieceType < Object.keys(PieceType).length,
-    `Non-player piece type assertion failed: ${pieceType}`
-  );
-}
-
-export function assertIsValidPlayerMovement(v1, v2) {
-  assertIsVector(v1);
-  assertIsVector(v2);
-  const dist = getDistance(v1, v2);
-  assert(dist === 1, `Invalid player movement! (${dist})`);
-}
-
-// ------------------------------------ TIMING UTILITIES ------------------------------------
-export function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 export function extractOccupiedCells(matrix) {
   const output = [];
   for (let y = 0; y < 8; y++) {
@@ -107,4 +93,9 @@ export function extractOccupiedCells(matrix) {
     }
   }
   return output;
+}
+
+// ------------------------------------ TIMING UTILITIES ------------------------------------
+export function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

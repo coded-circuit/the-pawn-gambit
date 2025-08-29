@@ -5,6 +5,7 @@ import {
   PageName,
   sleep,
   TRANSITION_HALF_LIFE,
+  BlackPieceType,
 } from "../../../../global/utils";
 
 import {
@@ -16,7 +17,7 @@ import { switchPage } from "../../../../data/menuSlice";
 import QuitSvg from "./QuitSvg";
 import ResetSvg from "./ResetSvg";
 import styles from "./UI.module.scss";
-import { BlackPieceType } from "../../logic/piece";
+
 
 const GameUI = ({
   touchHandlers,
