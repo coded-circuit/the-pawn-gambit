@@ -19,29 +19,34 @@ import { useSelector } from "react-redux";
 import { selectPlayerPosition } from "../../../../data/gameSlice";
 
 
-const Piece = ({  type, isCaptured }) => {
-  const gridPos = useSelector(selectPlayerPosition);
+const Piece = ({ gridPos, type, isCaptured }) => {
+  // Always select the player's position (used as a fallback only)
+  const playerGridPos = useSelector(selectPlayerPosition);
+  // Prefer the provided gridPos (for enemies and explicitly passed cases),
+  // otherwise fall back to the player's position (for the player's own piece).
+  const effectivePos = gridPos ?? playerGridPos;
+
   // --- Hooks are now correctly called at the top ---
   const [isMoving, setIsMoving] = useState(false);
 
   useEffect(() => {
-    // This effect will only run if gridPos changes.
-    // If gridPos is undefined, it won't run, which is safe.
+    // Animate only when we have a valid position and it changes.
+    if (!effectivePos) return;
     setIsMoving(true);
     const timer = setTimeout(() => setIsMoving(false), 250);
     return () => clearTimeout(timer);
-  }, [gridPos]);
+  }, [effectivePos?.x, effectivePos?.y]);
 
   // The safety check now happens after all hooks have been called.
-  if (!gridPos) {
+  if (!effectivePos) {
     return null;
   }
-  assertIsVector(gridPos);
+  assertIsVector(effectivePos);
 
   const gfxPlayerStyles = {
-    top: `${(gridPos.y * 100) / 8}%`,
-    left: `${(gridPos.x * 100) / 8}%`,
-    zIndex: gridPos.y,
+    top: `${(effectivePos.y * 100) / 8}%`,
+    left: `${(effectivePos.x * 100) / 8}%`,
+    zIndex: effectivePos.y,
     opacity: isCaptured ? 0.0 : 1.0,
   };
 

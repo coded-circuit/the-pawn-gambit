@@ -71,7 +71,7 @@ const GamePage = () => {
     dispatch(movePlayer({ targetPos: pos, isCapturing, difficulty }));
 
     setTimeout(() => {
-      dispatch(processPieces());
+      dispatch(processPieces({ difficulty }));
       dispatch(updateCaptureTiles());
 
       const currentState = store.getState().game;

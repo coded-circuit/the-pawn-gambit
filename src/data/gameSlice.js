@@ -13,6 +13,7 @@ import {
   getPieceCaptureXPIncrease,
   getSurvivalGems,
 } from "../features/game/logic/score";
+import { getNumberToSpawn, getPieceWithPos } from "../features/game/logic/spawning";
 
 export const playerCaptureCooldown = 6;
 const playerSpawnPos = { x: 3, y: 4 };
@@ -146,8 +147,68 @@ const gameSlice = createSlice({
       }
     },
     
-    processPieces: (state) => { /* Your enemy AI logic here */ },
-    updateCaptureTiles: (state) => { /* Your capture tiles logic here */ },
+    processPieces: (state, action) => {
+      // Spawn a few enemies based on difficulty, then let enemies capture the player if possible.
+      const difficulty = action?.payload?.difficulty;
+      const toSpawn = getNumberToSpawn(difficulty);
+      for (let i = 0; i < toSpawn; i += 1) {
+        const { type, pos } = getPieceWithPos(difficulty);
+        if (!state.occupiedCellsMatrix[pos.y][pos.x]) {
+          const { pieceId, newPiece } = createPiece(pos.x, pos.y, type);
+          state.pieces[pieceId] = newPiece;
+          state.occupiedCellsMatrix[pos.y][pos.x] = pieceId;
+        }
+      }
+
+      // Enemy capture step: if any enemy can capture the player, move onto the player's square and end the game.
+      const occupied = extractOccupiedCells(state.occupiedCellsMatrix);
+      const playerPos = state.player.position;
+      let playerCaptured = false;
+      for (const [pieceId, p] of Object.entries(state.pieces)) {
+        if (playerCaptured) break;
+        if (p.isCaptured) continue;
+        // Handle enemy cooldowns (only for non-player pieces which have numeric cooldowns)
+        if (typeof p.cooldown === "number" && p.cooldown > 0) {
+          p.cooldown -= 1;
+          continue;
+        }
+        const captures = PieceCaptureFunc[p.type](p.position, playerPos, occupied);
+        if (captures.some((c) => c.x === playerPos.x && c.y === playerPos.y)) {
+          // Move this piece onto the player's square and end the game
+          moveOccupiedCell(state, p.position, playerPos, pieceId);
+          p.position = { ...playerPos };
+          state.isGameOver = true;
+          // reset cooldown after a move
+          if (typeof PieceCooldown[p.type] === "number") {
+            p.cooldown = PieceCooldown[p.type];
+          }
+          playerCaptured = true;
+        }
+      }
+    },
+    updateCaptureTiles: (state) => {
+      // Compute all enemy capture tiles for UI and threat detection
+      const occupied = extractOccupiedCells(state.occupiedCellsMatrix);
+      const playerPos = state.player.position;
+      const captures = [];
+      Object.values(state.pieces).forEach((p) => {
+        if (p.isCaptured) return;
+        const caps = PieceCaptureFunc[p.type](p.position, playerPos, occupied);
+        captures.push(...caps);
+      });
+      // Deduplicate
+      const seen = new Set();
+      state.captureCells = captures.filter((c) => {
+        const key = `${c.x},${c.y}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      // Also end the game if player is standing on a threatened tile (parity with earlier behavior)
+      if (state.captureCells.some((c) => c.x === playerPos.x && c.y === playerPos.y)) {
+        state.isGameOver = true;
+      }
+    },
   },
   
 });
